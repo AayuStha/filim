@@ -1,3 +1,305 @@
+// ===================== PROFILE GATE SYSTEM =====================
+const DEFAULT_PROFILES = [
+    {
+        id: 'profile-1',
+        name: 'General',
+        color1: '#8b5cf6',
+        color2: '#6366f1',
+        icon: 'user-1',
+        focus: 'general'
+    },
+    {
+        id: 'profile-2',
+        name: 'Action',
+        color1: '#3b82f6',
+        color2: '#06b6d4',
+        icon: 'user-2',
+        focus: 'action'
+    },
+    {
+        id: 'profile-3',
+        name: 'Kids',
+        color1: '#f59e0b',
+        color2: '#ef4444',
+        icon: 'user-3',
+        focus: 'kids'
+    },
+    {
+        id: 'profile-4',
+        name: 'Sci-Fi',
+        color1: '#10b981',
+        color2: '#059669',
+        icon: 'user-4',
+        focus: 'scifi'
+    }
+];
+
+function getProfileSVG(profile, size = 120) {
+    const { color1, color2, icon } = profile;
+    const gradientId = `grad-${profile.id}-${size}`;
+
+    const icons = {
+        'user-1': `
+            <!-- Vintage Cinema Clapperboard -->
+            <rect x="30" y="46" width="60" height="42" rx="6" fill="white" opacity="0.9"/>
+            <rect x="30" y="32" width="60" height="10" rx="3" fill="white" opacity="0.75" transform="rotate(-12 60 37)"/>
+            <line x1="38" y1="36" x2="44" y2="30" stroke="${color1}" stroke-width="3"/>
+            <line x1="52" y1="33" x2="58" y2="27" stroke="${color1}" stroke-width="3"/>
+            <line x1="66" y1="30" x2="72" y2="24" stroke="${color1}" stroke-width="3"/>
+            <path d="M60 76 C60 76, 48 66, 48 59 C48 54, 53 50, 60 55 C67 50, 72 54, 72 59 C72 66, 60 76, 60 76 Z" fill="${color1}" opacity="0.9"/>
+        `,
+        'user-2': `
+            <!-- Glowing Thunderbolt / Energy -->
+            <polygon points="66,18 36,58 56,58 48,102 80,50 60,50" fill="white" opacity="0.95"/>
+            <circle cx="34" cy="35" r="3" fill="white" opacity="0.6"/>
+            <circle cx="84" cy="78" r="4" fill="white" opacity="0.6"/>
+        `,
+        'user-3': `
+            <!-- Cute Bear Face -->
+            <circle cx="38" cy="38" r="14" fill="white" opacity="0.9"/>
+            <circle cx="82" cy="38" r="14" fill="white" opacity="0.9"/>
+            <circle cx="60" cy="62" r="32" fill="white" opacity="0.95"/>
+            <circle cx="43" cy="65" r="5" fill="#ff7a7a" opacity="0.6"/>
+            <circle cx="77" cy="65" r="5" fill="#ff7a7a" opacity="0.6"/>
+            <circle cx="48" cy="56" r="3" fill="#1e1b4b"/>
+            <circle cx="72" cy="56" r="3" fill="#1e1b4b"/>
+            <ellipse cx="60" cy="66" rx="5" ry="3.5" fill="#1e1b4b"/>
+            <path d="M57 71 Q60 74 63 71" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        `,
+        'user-4': `
+            <!-- Retro Space Planet -->
+            <path d="M25 65 C25 55, 95 45, 95 55" stroke="white" stroke-width="6" fill="none" opacity="0.45" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="24" fill="white" opacity="0.9"/>
+            <path d="M25 60 C25 70, 95 60, 95 50" stroke="white" stroke-width="6" fill="none" opacity="0.9" stroke-linecap="round"/>
+            <polygon points="35,32 37,36 41,36 38,39 39,43 35,41 31,43 32,39 29,36 33,36" fill="white" opacity="0.8"/>
+            <polygon points="85,78 87,82 91,82 88,85 89,89 85,87 81,89 82,85 79,82 83,82" fill="white" opacity="0.8"/>
+        `
+    };
+
+    return `
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+            <defs>
+                <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:${color1}"/>
+                    <stop offset="100%" style="stop-color:${color2}"/>
+                </linearGradient>
+            </defs>
+            <rect width="120" height="120" rx="12" fill="url(#${gradientId})"/>
+            ${icons[icon] || icons['user-1']}
+        </svg>
+    `;
+}
+
+function getProfiles() {
+    return JSON.parse(localStorage.getItem('cinestream_profiles')) || DEFAULT_PROFILES;
+}
+
+function saveProfiles(profiles) {
+    localStorage.setItem('cinestream_profiles', JSON.stringify(profiles));
+}
+
+function initProfileGate() {
+    const profileGate = document.getElementById('profileGate');
+    const profileList = document.getElementById('profileList');
+    const manageBtn = document.getElementById('manageProfilesBtn');
+
+    if (!profileGate || !profileList) return;
+
+    // Check if profile already selected this session
+    const activeProfile = sessionStorage.getItem('activeProfile');
+    if (activeProfile) {
+        profileGate.style.display = 'none';
+        updateProfileSwitcher(JSON.parse(activeProfile));
+        return;
+    }
+
+    // Show gate, hide main content
+    document.body.classList.add('profile-gate-active');
+    profileGate.style.display = 'flex';
+    profileGate.classList.remove('hidden');
+
+    // Clear and render profiles
+    profileList.innerHTML = '';
+    const profiles = getProfiles();
+
+    profiles.forEach(profile => {
+        const card = document.createElement('div');
+        card.className = 'profile-card';
+        card.innerHTML = `
+            <div class="profile-avatar">
+                ${getProfileSVG(profile)}
+            </div>
+            <span class="profile-name">${profile.name}</span>
+        `;
+        card.addEventListener('click', () => selectProfile(profile));
+        profileList.appendChild(card);
+    });
+
+    // Add "Add Profile" card
+    const addCard = document.createElement('div');
+    addCard.className = 'profile-card add-profile';
+    addCard.innerHTML = `
+        <div class="profile-avatar">
+            <svg class="add-profile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </div>
+        <span class="profile-name">Add Profile</span>
+    `;
+    addCard.addEventListener('click', () => {
+        const name = prompt('Enter profile name:');
+        if (name && name.trim()) {
+            const focusInput = prompt('Choose profile type / focus (enter a number):\n1. General\n2. Kids & Family\n3. Action\n4. Sci-Fi');
+            let focus = 'general';
+            let icon = 'user-1';
+            
+            if (focusInput === '2') {
+                focus = 'kids';
+                icon = 'user-3';
+            } else if (focusInput === '3') {
+                focus = 'action';
+                icon = 'user-2';
+            } else if (focusInput === '4') {
+                focus = 'scifi';
+                icon = 'user-4';
+            }
+
+            const colors = [
+                ['#ec4899', '#db2777'],
+                ['#14b8a6', '#0d9488'],
+                ['#f97316', '#ea580c'],
+                ['#a855f7', '#9333ea'],
+                ['#8b5cf6', '#6366f1'],
+                ['#3b82f6', '#06b6d4']
+            ];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const newProfile = {
+                id: `profile-${Date.now()}`,
+                name: name.trim(),
+                color1: randomColor[0],
+                color2: randomColor[1],
+                icon: icon,
+                focus: focus
+            };
+            const allProfiles = getProfiles();
+            allProfiles.push(newProfile);
+            saveProfiles(allProfiles);
+            initProfileGate();
+        }
+    });
+    profileList.appendChild(addCard);
+
+    // Manage profiles button
+    if (manageBtn) {
+        manageBtn.onclick = () => {
+            if (confirm('Reset all profiles to default?')) {
+                localStorage.removeItem('cinestream_profiles');
+                initProfileGate();
+            }
+        };
+    }
+}
+
+function selectProfile(profile) {
+    const profileGate = document.getElementById('profileGate');
+
+    // Store selection for session
+    sessionStorage.setItem('activeProfile', JSON.stringify(profile));
+
+    // Animate out
+    profileGate.classList.add('hidden');
+
+    setTimeout(() => {
+        profileGate.style.display = 'none';
+        document.body.classList.remove('profile-gate-active');
+        
+        // Re-fetch content to load personalized movies/shows
+        if (typeof resetAndFetch === 'function') {
+            resetAndFetch();
+        }
+    }, 500);
+
+    // Update the header profile switcher
+    updateProfileSwitcher(profile);
+}
+
+function updateProfileSwitcher(activeProfile) {
+    const miniAvatar = document.getElementById('profileMiniAvatar');
+    const dropdownList = document.getElementById('profileDropdownList');
+    const switchBtn = document.getElementById('switchProfileBtn');
+    const editBtn = document.getElementById('editProfileBtn');
+    const profileSwitcherBtn = document.getElementById('profileSwitcherBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+
+    if (!miniAvatar) return;
+
+    // Set mini avatar
+    miniAvatar.innerHTML = getProfileSVG(activeProfile, 32);
+
+    // Populate dropdown with other profiles
+    const profiles = getProfiles();
+    dropdownList.innerHTML = '';
+
+    profiles.forEach(profile => {
+        const item = document.createElement('div');
+        item.className = `profile-dropdown-item ${profile.id === activeProfile.id ? 'active' : ''}`;
+        item.innerHTML = `
+            <div class="profile-dropdown-avatar">${getProfileSVG(profile, 28)}</div>
+            <span>${profile.name}</span>
+        `;
+        if (profile.id !== activeProfile.id) {
+            item.addEventListener('click', () => {
+                profileDropdown.classList.remove('show');
+                selectProfile(profile);
+            });
+        }
+        dropdownList.appendChild(item);
+    });
+
+    // Toggle dropdown
+    profileSwitcherBtn.onclick = (e) => {
+        e.stopPropagation();
+        profileDropdown.classList.toggle('show');
+    };
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+        if (!profileDropdown.contains(e.target) && !profileSwitcherBtn.contains(e.target)) {
+            profileDropdown.classList.remove('show');
+        }
+    });
+
+    // Edit profile name
+    editBtn.onclick = () => {
+        profileDropdown.classList.remove('show');
+        const newName = prompt('Enter new name for this profile:', activeProfile.name);
+        if (newName && newName.trim()) {
+            const allProfiles = getProfiles();
+            const idx = allProfiles.findIndex(p => p.id === activeProfile.id);
+            if (idx !== -1) {
+                allProfiles[idx].name = newName.trim();
+                saveProfiles(allProfiles);
+                const updatedProfile = { ...activeProfile, name: newName.trim() };
+                sessionStorage.setItem('activeProfile', JSON.stringify(updatedProfile));
+                updateProfileSwitcher(updatedProfile);
+            }
+        }
+    };
+
+    // Switch profile — go back to gate
+    switchBtn.onclick = () => {
+        profileDropdown.classList.remove('show');
+        sessionStorage.removeItem('activeProfile');
+        initProfileGate();
+    };
+}
+
+// Init profile gate immediately when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    initProfileGate();
+});
+
 // TMDB API Configuration
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
@@ -21,13 +323,17 @@ const loader = document.getElementById('loader');
 let currentPage = 1;
 let currentType = 'movie'; // 'movie' or 'tv'
 let currentCategory = 'trending'; // 'trending', 'en', 'hi', 'ne'
+let currentGenre = '';
 let currentQuery = '';
+let currentPersonId = '';
+let currentPersonName = '';
 let isLoading = false;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     fetchContent();
     setupEventListeners();
+    fetchGenres();
 });
 
 function setupEventListeners() {
@@ -75,6 +381,9 @@ function setupEventListeners() {
             document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             currentType = tab.dataset.type;
+            currentPersonId = '';
+            currentPersonName = '';
+            fetchGenres();
             resetAndFetch();
         });
     });
@@ -86,6 +395,8 @@ function setupEventListeners() {
             document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             currentCategory = tab.dataset.category;
+            currentPersonId = '';
+            currentPersonName = '';
             resetAndFetch();
         });
     });
@@ -152,6 +463,8 @@ function notifySubscribersOfNewContent(contentTitle) {
 
 function handleSearch() {
     currentQuery = movieSearch.value.trim();
+    currentPersonId = '';
+    currentPersonName = '';
     searchSuggestions.classList.remove('active');
     resetAndFetch();
 }
@@ -219,8 +532,14 @@ function resetAndFetch() {
     currentPage = 1;
     movieGrid.innerHTML = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const activeProfileJson = sessionStorage.getItem('activeProfile');
+    const activeProfile = activeProfileJson ? JSON.parse(activeProfileJson) : null;
+    const profileFocus = activeProfile ? activeProfile.focus : 'general';
     
-    if (currentQuery) {
+    if (currentPersonId) {
+        sectionTitle.textContent = `Works by/starring "${currentPersonName}"`;
+    } else if (currentQuery) {
         sectionTitle.textContent = `Search Results for "${currentQuery}"`;
     } else {
         const typeLabel = currentType === 'movie' ? 'Movies' : 'TV Shows';
@@ -230,7 +549,24 @@ function resetAndFetch() {
             'hi': 'Hindi',
             'ne': 'Nepali'
         };
-        sectionTitle.textContent = `${categoryLabels[currentCategory]} ${typeLabel}`;
+        
+        let focusLabel = '';
+        if (profileFocus === 'kids') focusLabel = 'Kids & Family ';
+        else if (profileFocus === 'action' && !currentGenre) focusLabel = 'Action ';
+        else if (profileFocus === 'scifi' && !currentGenre) focusLabel = 'Sci-Fi ';
+
+        // Get selected genre text
+        const activeGenreTab = document.querySelector('.genre-tab.active');
+        const genreName = activeGenreTab ? activeGenreTab.textContent : '';
+        
+        let categoryLabel = categoryLabels[currentCategory] === 'Trending' ? '' : categoryLabels[currentCategory] + ' ';
+        let genreLabel = (genreName && genreName !== 'All Genres') ? genreName + ' ' : '';
+        
+        if (genreLabel && categoryLabels[currentCategory] === 'Trending') {
+            categoryLabel = '';
+        }
+
+        sectionTitle.textContent = `${focusLabel}${categoryLabel}${genreLabel}${typeLabel}`;
     }
     
     fetchContent();
@@ -254,15 +590,63 @@ async function fetchContent(isLoadMore = false) {
     }
     
     try {
+        const activeProfileJson = sessionStorage.getItem('activeProfile');
+        const activeProfile = activeProfileJson ? JSON.parse(activeProfileJson) : null;
+        const profileFocus = activeProfile ? activeProfile.focus : 'general';
+
         let url;
-        if (currentQuery) {
+        if (currentPersonId) {
+            url = `${TMDB_BASE_URL}/discover/${currentType}?api_key=${TMDB_API_KEY}&sort_by=popularity.desc&page=${currentPage}&with_people=${currentPersonId}`;
+        } else if (currentQuery) {
             url = `${TMDB_BASE_URL}/search/${currentType}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
+            if (profileFocus === 'kids') {
+                url += `&with_genres=16,10751`; 
+            }
         } else {
-            if (currentCategory === 'trending') {
-                url = `${TMDB_BASE_URL}/trending/${currentType}/week?api_key=${TMDB_API_KEY}&page=${currentPage}`;
+            // Apply customized filters based on profile type
+            if (profileFocus === 'kids') {
+                // Kids mode: No global trending. Filter only family/animation
+                let genresStr = '16,10751';
+                if (currentGenre) {
+                    genresStr += `,${currentGenre}`;
+                }
+                url = `${TMDB_BASE_URL}/discover/${currentType}?api_key=${TMDB_API_KEY}&sort_by=popularity.desc&page=${currentPage}&with_genres=${genresStr}`;
+                if (currentCategory !== 'trending') {
+                    url += `&with_original_language=${currentCategory}`;
+                }
+            } else if (profileFocus === 'action') {
+                // Action profile: If browsing All Genres, show Action movies (28) by default
+                if (currentGenre) {
+                    url = `${TMDB_BASE_URL}/discover/${currentType}?api_key=${TMDB_API_KEY}&sort_by=popularity.desc&page=${currentPage}&with_genres=${currentGenre}`;
+                } else {
+                    url = `${TMDB_BASE_URL}/discover/${currentType}?api_key=${TMDB_API_KEY}&sort_by=popularity.desc&page=${currentPage}&with_genres=28`;
+                }
+                if (currentCategory !== 'trending') {
+                    url += `&with_original_language=${currentCategory}`;
+                }
+            } else if (profileFocus === 'scifi') {
+                // Sci-Fi profile: If browsing All Genres, show Sci-Fi movies (878) by default
+                if (currentGenre) {
+                    url = `${TMDB_BASE_URL}/discover/${currentType}?api_key=${TMDB_API_KEY}&sort_by=popularity.desc&page=${currentPage}&with_genres=${currentGenre}`;
+                } else {
+                    url = `${TMDB_BASE_URL}/discover/${currentType}?api_key=${TMDB_API_KEY}&sort_by=popularity.desc&page=${currentPage}&with_genres=878`;
+                }
+                if (currentCategory !== 'trending') {
+                    url += `&with_original_language=${currentCategory}`;
+                }
             } else {
-                // Discover by language for current type
-                url = `${TMDB_BASE_URL}/discover/${currentType}?api_key=${TMDB_API_KEY}&with_original_language=${currentCategory}&sort_by=popularity.desc&page=${currentPage}`;
+                // General Profile: standard logic
+                if (currentCategory === 'trending' && !currentGenre) {
+                    url = `${TMDB_BASE_URL}/trending/${currentType}/week?api_key=${TMDB_API_KEY}&page=${currentPage}`;
+                } else {
+                    url = `${TMDB_BASE_URL}/discover/${currentType}?api_key=${TMDB_API_KEY}&sort_by=popularity.desc&page=${currentPage}`;
+                    if (currentCategory !== 'trending') {
+                        url += `&with_original_language=${currentCategory}`;
+                    }
+                    if (currentGenre) {
+                        url += `&with_genres=${currentGenre}`;
+                    }
+                }
             }
         }
 
@@ -297,14 +681,21 @@ function showSkeletons() {
 
 function renderItems(items) {
     items.forEach(item => {
+        // Enforce strict availability and playability criteria
         if (!item.poster_path) return;
+        if (!item.overview || item.overview.trim() === '') return;
+        
+        const releaseDate = item.release_date || item.first_air_date;
+        if (!releaseDate) return;
+        
+        // Exclude unreleased or completely unpopular/placeholder titles (no votes)
+        if (item.vote_count === undefined || item.vote_count === 0 || !item.vote_average) return;
 
         const title = item.title || item.name;
-        const releaseDate = item.release_date || item.first_air_date;
         const year = releaseDate ? releaseDate.split('-')[0] : 'N/A';
 
         const card = document.createElement('div');
-        card.className = 'movie-card';
+        card.className = `movie-card ${item.original_language === 'ne' ? 'nepali-highlight' : ''}`;
         card.innerHTML = `
             <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${title}" class="movie-poster" loading="lazy">
             <div class="movie-info">
@@ -332,7 +723,7 @@ async function fetchDetailsAndOpen(id, type) {
     toggleModal(true);
     
     try {
-        const response = await fetch(`${TMDB_BASE_URL}/${type}/${id}?api_key=${TMDB_API_KEY}&append_to_response=videos,external_ids`);
+        const response = await fetch(`${TMDB_BASE_URL}/${type}/${id}?api_key=${TMDB_API_KEY}&append_to_response=videos,external_ids,credits`);
         if (!response.ok) throw new Error('Failed to fetch details');
         const details = await response.json();
         openPlayer(details, type);
@@ -360,6 +751,9 @@ function openPlayer(item, type) {
     const getUrls = (s = 1, e = 1) => {
         const urls = {
             'VsEmbed (Main)': `https://vsembed.ru/embed/${typePath}/${id}${isTV ? `/${s}/${e}` : ''}`,
+            'VidSrc.vip': `https://vidsrc.vip/embed/${typePath}/${id}${isTV ? `/${s}/${e}` : ''}`,
+            'SmashyStream': `https://embed.smashystream.com/playere.php?tmdb=${id}${isTV ? `&s=${s}&e=${e}` : ''}`,
+            'MultiEmbed': `https://multiembed.mov/directstream.php?video_id=${id}${isTV ? `&s=${s}&e=${e}` : ''}`,
             'VidSrc.ru': `https://vidsrc-embed.ru/embed/${typePath}/${id}${isTV ? `/${s}/${e}` : ''}`,
             'VidSrc.me': `https://vidsrc.me/embed/${typePath}/${id}${isTV ? `/${s}/${e}` : ''}`,
             'VidSrc.to': `https://vidsrc.to/embed/${typePath}/${id}${isTV ? `/${s}/${e}` : ''}`,
@@ -390,6 +784,24 @@ function openPlayer(item, type) {
     const title = item.title || item.name;
     const releaseDate = item.release_date || item.first_air_date;
     const genres = item.genres ? item.genres.map(g => g.name).join(', ') : 'N/A';
+
+    let directorHTML = '';
+    if (isTV && item.created_by && item.created_by.length > 0) {
+        const creators = item.created_by.map(c => `<span class="clickable-credit" data-id="${c.id}" data-name="${c.name}">${c.name}</span>`).join(', ');
+        directorHTML = `<p><strong>Creator(s):</strong> ${creators}</p>`;
+    } else if (item.credits && item.credits.crew) {
+        const directorObj = item.credits.crew.find(c => c.job === 'Director');
+        if (directorObj) {
+            directorHTML = `<p><strong>Director:</strong> <span class="clickable-credit" data-id="${directorObj.id}" data-name="${directorObj.name}">${directorObj.name}</span></p>`;
+        }
+    }
+
+    let castHTML = '';
+    if (item.credits && item.credits.cast && item.credits.cast.length > 0) {
+        const topCast = item.credits.cast.slice(0, 5);
+        const castLinks = topCast.map(actor => `<span class="clickable-credit" data-id="${actor.id}" data-name="${actor.name}">${actor.name}</span>`).join(', ');
+        castHTML = `<p><strong>Cast:</strong> ${castLinks}</p>`;
+    }
     
     const initialServers = getUrls(1, 1);
     let serverOptions = '';
@@ -406,6 +818,8 @@ function openPlayer(item, type) {
             <span class="meta-item">${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'} Rating</span>
         </div>
         <p><strong>Genres:</strong> ${genres || 'N/A'}</p>
+        ${directorHTML}
+        ${castHTML}
         <div class="overview">
             <p>${item.overview || 'No overview available for this title.'}</p>
         </div>
@@ -424,6 +838,11 @@ function openPlayer(item, type) {
                 </div>
             </div>
         </div>
+
+        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(title + (isTV ? ' full episodes' : ' full movie') + (item.original_language === 'ne' ? ' nepali' : item.original_language === 'hi' ? ' hindi' : ''))}" target="_blank" class="youtube-search-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            Search on YouTube (Fallback)
+        </a>
 
         ${isTV ? `
             <div class="tv-controls">
@@ -460,6 +879,36 @@ function openPlayer(item, type) {
 
     // Initial Load
     setTimeout(() => {
+        // Attach click listeners to credits inside details
+        movieDetails.querySelectorAll('.clickable-credit').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const personId = e.target.dataset.id;
+                const personName = e.target.dataset.name;
+                
+                // Close player modal
+                toggleModal(false);
+                
+                // Reset search queries
+                currentQuery = '';
+                movieSearch.value = '';
+                
+                // Set active person
+                currentPersonId = personId;
+                currentPersonName = personName;
+                
+                // Reset genre filters
+                currentGenre = '';
+                document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
+                const genreFilters = document.getElementById('genreFilters');
+                if (genreFilters) {
+                    const firstTab = genreFilters.querySelector('.genre-tab');
+                    if (firstTab) firstTab.classList.add('active');
+                }
+                
+                resetAndFetch();
+            });
+        });
+
         const serverSelect = document.getElementById('serverSelect');
         if (!serverSelect) return;
 
@@ -533,4 +982,89 @@ function toggleModal(show) {
         }, 500);
         document.body.style.overflow = 'auto';
     }
+}
+async function fetchGenres() {
+    try {
+        const response = await fetch(`${TMDB_BASE_URL}/genre/${currentType}/list?api_key=${TMDB_API_KEY}`);
+        const data = await response.json();
+        renderGenres(data.genres);
+    } catch (error) {
+        console.error('Error fetching genres:', error);
+    }
+}
+
+const KIDS_SAFE_GENRES = [16, 10751, 35, 12, 14]; // Animation, Family, Comedy, Adventure, Fantasy
+
+function showKidsRestrictionToast(genreName) {
+    let toast = document.getElementById('kidsToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'kidsToast';
+        toast.className = 'kids-toast';
+        document.body.appendChild(toast);
+    }
+    toast.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <span>"${genreName}" is locked on this Kids Profile!</span>
+    `;
+    toast.classList.add('show');
+    
+    // Auto remove after 3s
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+function renderGenres(genres) {
+    const genreFilters = document.getElementById('genreFilters');
+    genreFilters.innerHTML = '';
+
+    // All Genres Tab
+    const allTab = document.createElement('div');
+    allTab.className = 'genre-tab active';
+    allTab.dataset.id = '';
+    allTab.textContent = 'All Genres';
+    allTab.addEventListener('click', () => {
+        document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
+        allTab.classList.add('active');
+        currentGenre = '';
+        currentPersonId = '';
+        currentPersonName = '';
+        resetAndFetch();
+    });
+    genreFilters.appendChild(allTab);
+
+    const activeProfileJson = sessionStorage.getItem('activeProfile');
+    const activeProfile = activeProfileJson ? JSON.parse(activeProfileJson) : null;
+    const profileFocus = activeProfile ? activeProfile.focus : 'general';
+    
+    genres.forEach(genre => {
+        const tab = document.createElement('div');
+        tab.className = 'genre-tab';
+        tab.dataset.id = genre.id;
+        tab.textContent = genre.name;
+
+        // Check if kids-locked
+        const isKidsLocked = profileFocus === 'kids' && !KIDS_SAFE_GENRES.includes(genre.id);
+        if (isKidsLocked) {
+            tab.classList.add('kids-locked');
+            tab.title = `${genre.name} is restricted on Kids Profile`;
+        }
+        
+        tab.addEventListener('click', () => {
+            if (isKidsLocked) {
+                showKidsRestrictionToast(genre.name);
+                return;
+            }
+            
+            document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentGenre = tab.dataset.id;
+            currentPersonId = '';
+            currentPersonName = '';
+            resetAndFetch();
+        });
+        
+        genreFilters.appendChild(tab);
+    });
 }
