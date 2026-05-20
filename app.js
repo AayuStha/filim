@@ -590,13 +590,14 @@ function renderRecentlyWatched() {
     filteredHistory.forEach(item => {
         const card = document.createElement('div');
         card.className = 'recent-card';
+        const randomWidth = Math.floor(Math.random() * 70) + 15; // Random width between 15% and 85%
         card.innerHTML = `
             <img src="${item.poster_path ? TMDB_IMAGE_BASE_URL + item.poster_path : 'https://via.placeholder.com/140x210'}" alt="${item.title}" loading="lazy">
             <div class="recent-info">
                 <h4>${item.title}</h4>
                 ${item.type === 'tv' && item.season ? `<div class="recent-meta">S${item.season} E${item.episode}</div>` : ''}
             </div>
-            <div class="recent-progress-container"><div class="recent-progress-bar" style="width: 50%;"></div></div>
+            <div class="recent-progress-container"><div class="recent-progress-bar" style="width: ${randomWidth}%;"></div></div>
         `;
         
         card.addEventListener('click', () => {

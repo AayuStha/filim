@@ -377,17 +377,15 @@ body.light-theme .profile-switcher-btn:hover {
 .filter-strip {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 16px;
     padding: 16px 0 12px;
-    overflow-x: auto;
-    scrollbar-width: none;
 }
-
-.filter-strip::-webkit-scrollbar { display: none; }
 
 .sub-tabs {
     display: flex;
     gap: 6px;
+    flex-wrap: wrap;
     flex-shrink: 0;
 }
 
@@ -422,6 +420,7 @@ body.light-theme .profile-switcher-btn:hover {
 .genre-filters {
     display: flex;
     gap: 6px;
+    flex-wrap: wrap;
     flex-shrink: 0;
 }
 
