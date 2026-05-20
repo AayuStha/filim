@@ -1105,52 +1105,51 @@ function renderGenres(genres) {
     const genreFilters = document.getElementById('genreFilters');
     genreFilters.innerHTML = '';
 
-    // All Genres Tab
-    const allTab = document.createElement('div');
-    allTab.className = 'genre-tab active';
-    allTab.dataset.id = '';
-    allTab.textContent = 'All Genres';
-    allTab.addEventListener('click', () => {
-        document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
-        allTab.classList.add('active');
-        currentGenre = '';
-        currentPersonId = '';
-        currentPersonName = '';
-        resetAndFetch();
-    });
-    genreFilters.appendChild(allTab);
+    // All Genres Option
+    const allOpt = document.createElement('option');
+    allOpt.value = '';
+    allOpt.textContent = 'All Genres';
+    genreFilters.appendChild(allOpt);
 
     const activeProfileJson = sessionStorage.getItem('activeProfile');
     const activeProfile = activeProfileJson ? JSON.parse(activeProfileJson) : null;
     const profileFocus = activeProfile ? activeProfile.focus : 'general';
     
     genres.forEach(genre => {
-        const tab = document.createElement('div');
-        tab.className = 'genre-tab';
-        tab.dataset.id = genre.id;
-        tab.textContent = genre.name;
-
-        // Check if kids-locked
         const isKidsLocked = profileFocus === 'kids' && !KIDS_SAFE_GENRES.includes(genre.id);
+        
+        const opt = document.createElement('option');
+        opt.value = genre.id;
+        // Indicate lock visually in the text if it's locked
+        opt.textContent = isKidsLocked ? `🔒 ${genre.name}` : genre.name;
+        
         if (isKidsLocked) {
-            tab.classList.add('kids-locked');
-            tab.title = `${genre.name} is restricted on Kids Profile`;
+            opt.disabled = true; // Prevents selection
         }
         
-        tab.addEventListener('click', () => {
-            if (isKidsLocked) {
-                showKidsRestrictionToast(genre.name);
-                return;
-            }
-            
-            document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            currentGenre = tab.dataset.id;
-            currentPersonId = '';
-            currentPersonName = '';
-            resetAndFetch();
-        });
+        if (currentGenre === genre.id.toString()) {
+            opt.selected = true;
+        }
+
+        genreFilters.appendChild(opt);
+    });
+
+    // Handle change event
+    genreFilters.addEventListener('change', (e) => {
+        const selectedId = e.target.value;
+        const selectedOpt = e.target.options[e.target.selectedIndex];
         
-        genreFilters.appendChild(tab);
+        // If they somehow managed to click a disabled locked option (some browsers allow this via keyboard)
+        if (selectedOpt.disabled) {
+            showKidsRestrictionToast(selectedOpt.textContent.replace('🔒 ', ''));
+            // Revert selection
+            e.target.value = currentGenre;
+            return;
+        }
+        
+        currentGenre = selectedId;
+        currentPersonId = '';
+        currentPersonName = '';
+        resetAndFetch();
     });
 }

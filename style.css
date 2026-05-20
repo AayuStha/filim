@@ -417,31 +417,30 @@ body.light-theme .profile-switcher-btn:hover {
     flex-shrink: 0;
 }
 
-.genre-filters {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+.genre-dropdown {
+    padding: 6px 36px 6px 16px;
+    border-radius: 100px;
+    background: var(--surface) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 12px center;
+    background-size: 16px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    transition: all 0.25s ease;
     flex-shrink: 0;
 }
 
-.genre-tab {
-    padding: 5px 12px;
-    border-radius: 100px;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    font-size: 0.75rem;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: var(--speed);
+.genre-dropdown:hover {
+    color: var(--text);
+    border-color: var(--accent);
 }
 
-.genre-tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
-
-.genre-tab.active {
-    background: var(--accent);
-    color: white;
+.genre-dropdown:focus {
+    outline: none;
     border-color: var(--accent);
+    color: white;
 }
 
 /* ===================== RESULTS ===================== */
