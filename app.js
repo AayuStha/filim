@@ -528,10 +528,94 @@ function debounce(func, wait) {
     };
 }
 
+// History Management
+function getHistory() {
+    const activeProfileJson = sessionStorage.getItem('activeProfile');
+    if (!activeProfileJson) return [];
+    const activeProfile = JSON.parse(activeProfileJson);
+    return JSON.parse(localStorage.getItem(`cinestream_history_${activeProfile.id}`)) || [];
+}
+
+function saveToHistory(item, season = null, episode = null) {
+    const activeProfileJson = sessionStorage.getItem('activeProfile');
+    if (!activeProfileJson) return;
+    const activeProfile = JSON.parse(activeProfileJson);
+    const historyKey = `cinestream_history_${activeProfile.id}`;
+    
+    let history = JSON.parse(localStorage.getItem(historyKey)) || [];
+    
+    // Remove if already exists to push to top
+    history = history.filter(h => h.id !== item.id);
+    
+    const historyItem = {
+        id: item.id,
+        type: item.name ? 'tv' : 'movie',
+        title: item.title || item.name,
+        poster_path: item.poster_path,
+        season: season,
+        episode: episode,
+        timestamp: new Date().getTime()
+    };
+    
+    history.unshift(historyItem);
+    
+    // Keep only last 20 items
+    if (history.length > 20) {
+        history = history.slice(0, 20);
+    }
+    
+    localStorage.setItem(historyKey, JSON.stringify(history));
+}
+
+function renderRecentlyWatched() {
+    const section = document.getElementById('recentlyWatchedSection');
+    const grid = document.getElementById('recentlyWatchedGrid');
+    
+    // Only show on home feed (trending movies/tv, no searches or person filters)
+    if (currentQuery || currentPersonId || currentGenre || currentCategory !== 'trending') {
+        section.style.display = 'none';
+        return;
+    }
+    
+    const history = getHistory();
+    // Filter history to current type (movie vs tv)
+    const filteredHistory = history.filter(h => h.type === currentType);
+    
+    if (filteredHistory.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    
+    grid.innerHTML = '';
+    filteredHistory.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'recent-card';
+        card.innerHTML = `
+            <img src="${item.poster_path ? TMDB_IMAGE_BASE_URL + item.poster_path : 'https://via.placeholder.com/140x210'}" alt="${item.title}" loading="lazy">
+            <div class="recent-info">
+                <h4>${item.title}</h4>
+                ${item.type === 'tv' && item.season ? `<div class="recent-meta">S${item.season} E${item.episode}</div>` : ''}
+            </div>
+            <div class="recent-progress-container"><div class="recent-progress-bar" style="width: 50%;"></div></div>
+        `;
+        
+        card.addEventListener('click', () => {
+            // Re-fetch details to open the player. We'll pass season and episode later.
+            fetchDetailsAndOpen(item.id, item.type, item.season, item.episode);
+        });
+        
+        grid.appendChild(card);
+    });
+    
+    section.style.display = 'block';
+}
+
 function resetAndFetch() {
     currentPage = 1;
     movieGrid.innerHTML = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    renderRecentlyWatched();
 
     const activeProfileJson = sessionStorage.getItem('activeProfile');
     const activeProfile = activeProfileJson ? JSON.parse(activeProfileJson) : null;
@@ -714,7 +798,7 @@ function renderItems(items) {
     });
 }
 
-async function fetchDetailsAndOpen(id, type) {
+async function fetchDetailsAndOpen(id, type, season = null, episode = null) {
     if (!id || !type) return;
     
     // Reset modal content and show loading
@@ -726,14 +810,14 @@ async function fetchDetailsAndOpen(id, type) {
         const response = await fetch(`${TMDB_BASE_URL}/${type}/${id}?api_key=${TMDB_API_KEY}&append_to_response=videos,external_ids,credits`);
         if (!response.ok) throw new Error('Failed to fetch details');
         const details = await response.json();
-        openPlayer(details, type);
+        openPlayer(details, type, season, episode);
     } catch (error) {
         console.error('Error fetching details:', error);
         movieDetails.innerHTML = '<div class="error-details"><h3>Error loading details</h3><p>Please try again later.</p></div>';
     }
 }
 
-function openPlayer(item, type) {
+function openPlayer(item, type, initialSeason = null, initialEpisode = null) {
     if (!item || (!item.title && !item.name)) {
         console.error('Invalid item object:', item);
         movieDetails.innerHTML = '<div class="error-details"><h3>Invalid Content</h3><p>We couldn\'t find the details for this item.</p></div>';
@@ -745,8 +829,8 @@ function openPlayer(item, type) {
     const id = item.id;
     const imdbId = item.external_ids ? item.external_ids.imdb_id : null;
     
-    let currentSeason = 1;
-    let currentEpisode = 1;
+    let currentSeason = initialSeason || 1;
+    let currentEpisode = initialEpisode || 1;
 
     const getUrls = (s = 1, e = 1) => {
         const urls = {
@@ -849,7 +933,7 @@ function openPlayer(item, type) {
                 <div class="season-select-wrapper">
                     <label for="seasonSelect">Select Season:</label>
                     <select id="seasonSelect" style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; outline: none; cursor: pointer;">
-                        ${item.seasons.map(s => `<option value="${s.season_number}">${s.name || `Season ${s.season_number}`}</option>`).join('')}
+                        ${item.seasons.map(s => `<option value="${s.season_number}" ${s.season_number === currentSeason ? 'selected' : ''}>${s.name || `Season ${s.season_number}`}</option>`).join('')}
                     </select>
                 </div>
                 <div class="episodes-container">
@@ -874,6 +958,7 @@ function openPlayer(item, type) {
         videoPlayer.src = 'about:blank';
         setTimeout(() => {
             videoPlayer.src = targetUrl;
+            saveToHistory(item, isTV ? currentSeason : null, isTV ? currentEpisode : null);
         }, 100);
     };
 

@@ -455,6 +455,98 @@ body.light-theme .profile-switcher-btn:hover {
     letter-spacing: -0.5px;
 }
 
+/* Recently Watched Row */
+.recently-watched-section {
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.recently-watched-section h2 {
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.recent-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding-bottom: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--surface);
+}
+
+.recent-grid::-webkit-scrollbar {
+    height: 6px;
+}
+.recent-grid::-webkit-scrollbar-track {
+    background: var(--surface);
+    border-radius: 10px;
+}
+.recent-grid::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+.recent-card {
+    flex: 0 0 140px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--speed);
+    position: relative;
+}
+
+.recent-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 10px 20px var(--accent-glow);
+}
+
+.recent-card img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    display: block;
+}
+
+.recent-info {
+    padding: 10px;
+}
+
+.recent-info h4 {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recent-meta {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+/* Progress bar inside recent card */
+.recent-progress-container {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.recent-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%; /* We can't track exactly, but we can set it to a fixed width or 50% just to visually imply resume */
+}
+
 .movie-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
