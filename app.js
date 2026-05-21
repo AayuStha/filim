@@ -337,6 +337,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
+    // Logo Click (Refresh / Home)
+    const mainLogo = document.getElementById('mainLogo');
+    if (mainLogo) {
+        mainLogo.addEventListener('click', () => {
+            window.location.reload();
+        });
+    }
+
     // Theme Toggle
     const themeToggle = document.getElementById('themeToggle');
     const sunIcon = themeToggle.querySelector('.sun-icon');
