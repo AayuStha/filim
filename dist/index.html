@@ -9,7 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css">
+  <script type="module" crossorigin src="/assets/index-DV3-Zazo.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-dMdEH7r1.css">
 </head>
 <body>
     <div id="loader" class="loader-container">
@@ -91,7 +92,7 @@
         <!-- Sub-filters + Genres in one compact strip -->
         <div class="filter-strip">
             <div class="sub-tabs">
-                <div class="tab sub-tab active" data-category="trending">Trending</div>
+                <div class="tab sub-tab active" data-category="trending">🔥 Trending</div>
                 <div class="tab sub-tab" data-category="en">English</div>
                 <div class="tab sub-tab" data-category="hi">Hindi</div>
                 <div class="tab sub-tab" data-category="ne">Nepali</div>
@@ -131,7 +132,7 @@
                     <!-- Group sync status overlay -->
                     <div id="syncStatusOverlay" class="sync-status-overlay">
                         <div class="sync-status-card">
-                            <div class="sync-status-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="4" width="4" height="16" rx="1"></rect><rect x="6" y="4" width="4" height="16" rx="1"></rect></svg></div>
+                            <div class="sync-status-icon">⏸️</div>
                             <h3 id="syncStatusTitle">Party Paused</h3>
                             <p id="syncStatusMsg">Waiting for the host to resume...</p>
                             <div class="countdown-number" id="syncCountdown" style="display: none;">3</div>
@@ -150,10 +151,10 @@
                     <!-- Tabs Header (hidden when not in party mode) -->
                     <div class="sidebar-tabs" id="sidebarTabs" style="display: none;">
                         <button class="sidebar-tab active" id="chatTabBtn" data-tab="chat">
-                            Chat
+                            💬 Chat
                         </button>
                         <button class="sidebar-tab" id="detailsTabBtn" data-tab="details">
-                            Details
+                            ℹ️ Details
                         </button>
                     </div>
                     
@@ -188,18 +189,12 @@
                         
                         <!-- Floating reactions trigger panel -->
                         <div class="chat-reactions-strip">
-                            <button class="reaction-btn" data-emoji="love" title="Love">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="reaction-svg-btn" style="color: #ff4b82; display: block;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                            </button>
-                            <button class="reaction-btn" data-emoji="like" title="Like">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="reaction-svg-btn" style="color: #3b82f6; display: block;"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3z"/></svg>
-                            </button>
-                            <button class="reaction-btn" data-emoji="fire" title="Fire">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="reaction-svg-btn" style="color: #f97316; display: block;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-                            </button>
-                            <button class="reaction-btn" data-emoji="star" title="Star">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="reaction-svg-btn" style="color: #eab308; display: block;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                            </button>
+                            <button class="reaction-btn" data-emoji="🎉" title="Blast 🎉">🎉</button>
+                            <button class="reaction-btn" data-emoji="🔥" title="Blast 🔥">🔥</button>
+                            <button class="reaction-btn" data-emoji="😂" title="Blast 😂">😂</button>
+                            <button class="reaction-btn" data-emoji="😮" title="Blast 😮">😮</button>
+                            <button class="reaction-btn" data-emoji="😢" title="Blast 😢">😢</button>
+                            <button class="reaction-btn" data-emoji="💖" title="Blast 💖">💖</button>
                         </div>
 
                         <!-- Chat Text Input Form -->
@@ -211,7 +206,7 @@
                         <!-- Virtual Friends Banner -->
                         <div class="bot-invite-banner" id="botInviteBanner">
                             <span>Watching alone?</span>
-                            <button id="inviteBotsBtn" class="invite-bots-btn">Add AI Friends</button>
+                            <button id="inviteBotsBtn" class="invite-bots-btn">🤖 Add AI Friends</button>
                         </div>
                     </div>
                     
@@ -219,10 +214,10 @@
                     <div class="tab-panel" id="detailsPanel">
                         <!-- Host control bar (visible only to room Host inside details tab) -->
                         <div id="hostControlsPanel" class="host-controls-panel" style="display: none;">
-                            <div class="host-controls-label">Host Group controls:</div>
+                            <div class="host-controls-label">👑 Host Group controls:</div>
                             <div class="host-controls-row">
-                                <button id="hostSyncBtn" class="host-btn">Pause Party</button>
-                                <button id="hostResetSyncBtn" class="host-btn secondary">Force Sync</button>
+                                <button id="hostSyncBtn" class="host-btn">⏸️ Pause Party</button>
+                                <button id="hostResetSyncBtn" class="host-btn secondary">🔄 Force Sync</button>
                             </div>
                         </div>
                         
@@ -278,6 +273,5 @@
         </div>
     </footer>
 
-    <script type="module" src="/app.js"></script>
 </body>
 </html>
