@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Play, Users, Star, ArrowLeft, Send, Tv, UserCircle } from 'lucide-react';
+import { Play, Star, ArrowLeft, Send, Tv, UserCircle } from 'lucide-react';
 import CustomSelect from '../components/CustomSelect';
 
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY || 'f69f2c8f33e02716fb1c44a6941396f8';
@@ -182,12 +182,6 @@ export default function DetailsPage() {
                 onClick={() => navigate(`/watch/${type}/${id}${type === 'tv' ? `?s=${selectedSeason}&e=1` : ''}`)}
               >
                 <Play fill="white" size={17} /> Watch Now
-              </button>
-              <button 
-                className="btn-play-action party"
-                onClick={() => navigate(`/watch/${type}/${id}?party=true${type === 'tv' ? `&s=${selectedSeason}&e=1` : ''}`)}
-              >
-                <Users size={17} /> Host CineParty
               </button>
             </div>
           </div>

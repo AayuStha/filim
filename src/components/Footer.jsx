@@ -19,7 +19,7 @@ export default function Footer() {
       <div className="container footer-content">
         <div className="footer-brand">
           <div className="logo">Cine<span>Stream</span></div>
-          <p>Your premium destination for high quality streaming, multi-season series, and synchronized watch parties.</p>
+          <p>Your premium destination for high quality streaming and multi-season series.</p>
         </div>
 
         <div className="footer-links">
@@ -35,7 +35,6 @@ export default function Footer() {
         <div className="footer-links">
           <h4>Features</h4>
           <ul>
-            <li><a href="#">CineParty Co-watching</a></li>
             <li><a href="#">SpeedoStream Ultra Servers</a></li>
             <li><a href="#">Custom React UI Dropdowns</a></li>
             <li><a href="#">Local Watch History</a></li>
