@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Keyboard, Play, Tv, Sparkles, Server, Search, Volume2, Maximize, SunMedium } from 'lucide-react';
 
 export default function HotkeysModal({ isOpen, onClose }) {
@@ -48,7 +49,7 @@ export default function HotkeysModal({ isOpen, onClose }) {
     }
   ];
 
-  return (
+  return createPortal(
     <div className="hotkeys-modal-overlay" onClick={onClose}>
       <div className="hotkeys-modal-dialog" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
@@ -87,6 +88,7 @@ export default function HotkeysModal({ isOpen, onClose }) {
           <span>Pro tip: Press <kbd className="hotkeys-mini-kbd">?</kbd> anywhere on AAYUSH to toggle this cheat sheet.</span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

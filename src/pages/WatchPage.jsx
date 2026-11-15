@@ -22,8 +22,8 @@ const VIDEO_SERVERS = [
     quality: '4K UHD',
     getUrl: (type, id, s, e) => 
       type === 'tv' 
-        ? `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=e50914&autoplay=false`
-        : `https://vidlink.pro/movie/${id}?primaryColor=e50914&autoplay=false`
+        ? `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=e50914&autoplay=true`
+        : `https://vidlink.pro/movie/${id}?primaryColor=e50914&autoplay=true`
   },
   {
     id: 'videasy',

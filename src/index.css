@@ -18,7 +18,7 @@
   --netflix-text-muted: #a3a3a3;
   --netflix-text-dim: #737373;
   --netflix-border: rgba(255, 255, 255, 0.1);
-  --netflix-nav-height: 72px;
+  --netflix-nav-height: 64px;
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -114,18 +114,18 @@ img {
   right: 0;
   height: var(--netflix-nav-height);
   z-index: 1000;
-  /* Deep, ultra-clean minimal cinematic backdrop */
-  background: linear-gradient(180deg, rgba(10, 10, 14, 0.92) 0%, rgba(12, 12, 16, 0.75) 60%, rgba(14, 14, 20, 0.2) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  /* Cinematic translucent gradient allowing billboard video to bleed seamlessly to top */
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.25) 60%, transparent 100%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid transparent;
+  transition: background 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), backdrop-filter 0.4s ease, -webkit-backdrop-filter 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .netflix-navbar.scrolled {
-  background: rgba(10, 10, 14, 0.96);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: rgba(10, 10, 14, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85);
 }
@@ -155,9 +155,9 @@ img {
 
 .logo-brand {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.15rem;
+  font-size: 1.85rem;
   line-height: 1;
-  letter-spacing: 2.5px;
+  letter-spacing: 2px;
   font-weight: 900;
   background: linear-gradient(135deg, #e50914 0%, #ff3b3b 60%, #e50914 100%);
   -webkit-background-clip: text;
@@ -179,10 +179,10 @@ img {
 
 .nav-item {
   position: relative;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 500;
   color: #b3b3b8;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 9999px;
   transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: inline-flex;
@@ -234,13 +234,14 @@ img {
 .nav-roulette-pill-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: linear-gradient(135deg, rgba(229, 9, 20, 0.16) 0%, rgba(139, 92, 246, 0.16) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.2) 0%, rgba(139, 92, 246, 0.22) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   color: #ffffff;
-  padding: 7px 15px;
+  padding: 0 13px;
+  height: 34px;
   border-radius: 9999px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.2px;
   cursor: pointer;
@@ -248,10 +249,10 @@ img {
 }
 
 .nav-roulette-pill-btn:hover {
-  background: linear-gradient(135deg, rgba(229, 9, 20, 0.35) 0%, rgba(139, 92, 246, 0.35) 100%);
-  border-color: rgba(255, 255, 255, 0.32);
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.38) 0%, rgba(139, 92, 246, 0.38) 100%);
+  border-color: rgba(255, 255, 255, 0.35);
   transform: translateY(-1px);
-  box-shadow: 0 4px 18px rgba(229, 9, 20, 0.3);
+  box-shadow: 0 4px 18px rgba(229, 9, 20, 0.35);
 }
 
 .nav-dice-icon {
@@ -268,8 +269,8 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -279,9 +280,9 @@ img {
 }
 
 .nav-utility-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.24);
 }
 
 .nav-utility-icon-btn.sound-on {
@@ -298,18 +299,19 @@ img {
   position: relative;
   background: transparent;
   border-radius: 9999px;
-  padding: 4px;
+  padding: 0;
   transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
   border: 1px solid transparent;
 }
 
 .nav-search-box.open {
-  background: rgba(18, 18, 24, 0.92);
+  background: rgba(18, 18, 24, 0.94);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(229, 9, 20, 0.3);
-  padding: 5px 12px 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(229, 9, 20, 0.35);
+  padding: 0 10px 0 0;
+  height: 34px;
 }
 
 .search-icon-btn, .icon-btn {
@@ -317,8 +319,8 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: transparent;
   border: none;
@@ -710,11 +712,14 @@ img {
 }
 
 .billboard-backdrop-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center 25%;
-  transition: opacity 0.8s ease;
+  z-index: 1;
+  transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .billboard-backdrop-img.video-active {
@@ -730,7 +735,13 @@ img {
   height: 140%;
   pointer-events: none !important;
   overflow: hidden;
-  z-index: 1;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.billboard-video-wrapper.ready {
+  opacity: 1;
 }
 
 .billboard-iframe {
@@ -741,7 +752,7 @@ img {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(1.4);
+  transform: translate(-50%, -50%) scale(1.45);
   border: none;
   pointer-events: none !important;
   user-select: none;
@@ -751,7 +762,7 @@ img {
 .billboard-touch-guard {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 5;
   pointer-events: auto;
   background: transparent;
   cursor: default;
@@ -761,8 +772,8 @@ img {
 .billboard-vignette-left {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, #141414 0%, rgba(20, 20, 20, 0.78) 35%, transparent 68%);
-  z-index: 2;
+  background: linear-gradient(90deg, #141414 0%, rgba(20, 20, 20, 0.72) 32%, transparent 62%);
+  z-index: 3;
 }
 
 .billboard-vignette-bottom {
@@ -770,9 +781,9 @@ img {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 240px;
-  background: linear-gradient(180deg, transparent 0%, rgba(20, 20, 20, 0.6) 40%, #141414 100%);
-  z-index: 2;
+  height: 180px;
+  background: linear-gradient(180deg, transparent 0%, rgba(20, 20, 20, 0.6) 45%, #141414 100%);
+  z-index: 3;
 }
 
 .billboard-vignette-top {
@@ -780,9 +791,9 @@ img {
   top: 0;
   left: 0;
   right: 0;
-  height: 130px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
-  z-index: 2;
+  height: 100px;
+  background: linear-gradient(180deg, rgba(10, 10, 14, 0.6) 0%, transparent 100%);
+  z-index: 3;
 }
 
 .billboard-content {
@@ -1769,19 +1780,19 @@ img {
 .episodes-cards-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 6px;
 }
 
 /* Individual Episode Item Card */
 .episode-item-card {
   display: flex;
   align-items: center;
-  gap: 22px;
-  background: rgba(20, 20, 28, 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: var(--radius-md);
-  padding: 16px 20px;
+  gap: 16px;
+  background: rgba(20, 20, 28, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
   cursor: pointer;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
@@ -1816,7 +1827,7 @@ img {
 
 /* Thumbnail container */
 .episode-thumbnail-wrap {
-  width: 200px;
+  width: 160px;
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -1996,7 +2007,7 @@ img {
 }
 
 .skeleton-thumb {
-  width: 200px;
+  width: 160px;
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-sm);
   background: linear-gradient(90deg, #181822 25%, #242434 50%, #181822 75%);
@@ -5317,7 +5328,7 @@ img {
    ============================================================ */
 @media (max-width: 1024px) {
   :root {
-    --netflix-nav-height: 68px;
+    --netflix-nav-height: 60px;
   }
   .details-header-layout {
     gap: 28px;
@@ -5339,7 +5350,7 @@ img {
 
 @media (max-width: 768px) {
   :root {
-    --netflix-nav-height: 64px;
+    --netflix-nav-height: 56px;
   }
 
   .navbar-links {
@@ -5352,6 +5363,14 @@ img {
 
   .nav-search-box.open input {
     width: 150px;
+  }
+
+  .nav-btn-text {
+    display: none;
+  }
+
+  .nav-roulette-pill-btn {
+    padding: 5px 8px;
   }
 
   .billboard-title {
@@ -5481,7 +5500,7 @@ img {
 
 @media (max-width: 480px) {
   :root {
-    --netflix-nav-height: 64px;
+    --netflix-nav-height: 52px;
   }
 
   .logo-brand {
@@ -7165,73 +7184,7 @@ img {
   color: #71717a;
 }
 
-/* ============================================================
-   HERO BILLBOARD TOUCH GUARD & SMOOTH BUFFERING (NO FLASH)
-   ============================================================ */
-.billboard-touch-guard {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 5;
-  pointer-events: auto;
-  background: transparent;
-}
 
-.billboard-backdrop-img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: opacity 0.8s ease;
-  z-index: 2;
-  opacity: 1;
-}
-
-.billboard-backdrop-img.video-active {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.billboard-video-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-
-.billboard-video-wrapper.ready {
-  opacity: 1;
-}
-
-.billboard-sound-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(20, 20, 28, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  cursor: pointer;
-  margin-left: 8px;
-  transition: all 0.2s ease;
-}
-
-.billboard-sound-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.08);
-}
 
 /* ============================================================
    1. FILM ROULETTE / "SURPRISE ME" MODAL
@@ -7239,24 +7192,29 @@ img {
 .roulette-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 2000;
-  background: rgba(4, 4, 8, 0.88);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  z-index: 2500;
+  background: rgba(4, 4, 8, 0.94);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 24px;
+  align-items: flex-start;
+  padding: clamp(16px, 4vh, 32px) 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   animation: modalFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .roulette-modal-container {
   position: relative;
   width: 100%;
-  max-width: 680px;
+  max-width: 620px;
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
   background: #0d0e15;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
+  border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 50px rgba(229, 9, 20, 0.25);
   animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -7264,15 +7222,15 @@ img {
 
 .roulette-close-btn {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 20;
+  top: 14px;
+  right: 14px;
+  z-index: 25;
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(14, 14, 20, 0.75);
+  background: rgba(14, 14, 20, 0.8);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   color: #e5e5eb;
   display: flex;
   align-items: center;
@@ -7282,25 +7240,26 @@ img {
 }
 
 .roulette-close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(229, 9, 20, 0.7);
+  border-color: #e50914;
   color: #ffffff;
   transform: scale(1.08);
 }
 
 .roulette-top-tag {
   position: absolute;
-  top: 18px;
-  left: 20px;
-  z-index: 20;
+  top: 16px;
+  left: 18px;
+  z-index: 25;
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(10, 10, 16, 0.7);
+  background: rgba(10, 10, 16, 0.85);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9999px;
-  padding: 5px 14px;
-  font-size: 0.75rem;
+  padding: 4px 12px;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   color: #ff4d4d;
@@ -7309,12 +7268,13 @@ img {
 .roulette-stage {
   position: relative;
   width: 100%;
-  height: 290px;
+  height: 230px;
   background: #08080c;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .roulette-backdrop-img {
@@ -7342,9 +7302,9 @@ img {
 .roulette-poster-wrapper {
   position: relative;
   z-index: 10;
-  width: 135px;
-  height: 195px;
-  border-radius: 12px;
+  width: 120px;
+  height: 175px;
+  border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
   border: 2px solid rgba(255, 255, 255, 0.18);
@@ -7353,6 +7313,7 @@ img {
   align-items: center;
   justify-content: center;
   background: #151622;
+  flex-shrink: 0;
 }
 
 .roulette-poster-wrapper.blur-pulse {

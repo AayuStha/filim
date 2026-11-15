@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { X, Play, RotateCw, Sparkles, Star, Film, Check, Plus } from 'lucide-react';
 import { playRouletteClickSound, playWinnerChimeSound, playCinematicIntroSound } from '../utils/soundEffects';
@@ -108,7 +109,7 @@ export default function FilmRouletteModal({ isOpen, onClose }) {
   const rating = currentDisplay?.vote_average ? currentDisplay.vote_average.toFixed(1) : '8.5';
   const matchScore = Math.min(99, Math.max(88, Math.round((currentDisplay?.vote_average || 8) * 10) + 12));
 
-  return (
+  return createPortal(
     <div className="roulette-modal-overlay" onClick={onClose}>
       <div className="roulette-modal-container" onClick={(e) => e.stopPropagation()}>
         {/* Close Button */}
@@ -212,6 +213,7 @@ export default function FilmRouletteModal({ isOpen, onClose }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

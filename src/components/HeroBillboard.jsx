@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Info, Plus, Check, Volume2, VolumeX, Flame } from 'lucide-react';
+import { Play, Pause, Info, Plus, Check, Volume2, VolumeX, Flame } from 'lucide-react';
 import { isInMyList, toggleMyListStatus } from '../utils/myList';
 import { playCinematicIntroSound } from '../utils/soundEffects';
 
@@ -13,6 +13,7 @@ export default function HeroBillboard({ item, type = 'movie', onOpenQuickView })
   const [trailerKey, setTrailerKey] = useState(null);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
+  const [isTrailerPaused, setIsTrailerPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [inList, setInList] = useState(false);
   const iframeRef = useRef(null);
@@ -24,6 +25,7 @@ export default function HeroBillboard({ item, type = 'movie', onOpenQuickView })
     setTrailerKey(null);
     setIsPlayingVideo(false);
     setIsVideoReady(false);
+    setIsTrailerPaused(false);
     setIsMuted(true);
 
     // Fetch trailer from TMDB
@@ -32,32 +34,60 @@ export default function HeroBillboard({ item, type = 'movie', onOpenQuickView })
       .then(res => res.json())
       .then(data => {
         const videos = data.results || [];
-        // Look for official trailer first, then teaser, then clip
-        const trailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube')
-          || videos.find(v => v.type === 'Teaser' && v.site === 'YouTube')
-          || videos.find(v => v.type === 'Clip' && v.site === 'YouTube')
-          || videos.find(v => v.site === 'YouTube');
+        // Strictly prioritize official studio trailers/teasers to prevent fan-made/reaction clips
+        const officialTrailer = videos.find(v => v.site === 'YouTube' && v.type === 'Trailer' && v.official);
+        const officialTeaser = videos.find(v => v.site === 'YouTube' && v.type === 'Teaser' && v.official);
+        const officialAny = videos.find(v => v.site === 'YouTube' && v.official);
+        const namedOfficial = videos.find(v => v.site === 'YouTube' && /official\s+(trailer|teaser)/i.test(v.name));
+        
+        // Pick the verified trailer; if none exists, keep the pristine 4K backdrop poster
+        const trailer = officialTrailer || officialTeaser || officialAny || namedOfficial;
 
         if (trailer?.key) {
           setTrailerKey(trailer.key);
-          // Auto-start video trailer silently behind poster, fade in only after buffering finishes
+          // Delay mounting iframe slightly to ensure seamless backdrop presentation
           const startTimer = setTimeout(() => {
             setIsPlayingVideo(true);
-          }, 1000);
+          }, 1200);
 
-          // Grace period: Wait until YouTube starts rendering video frames to hide player controls
+          // Grace period: Wait until YouTube starts rendering video frames to hide initial player controls
           const readyTimer = setTimeout(() => {
             setIsVideoReady(true);
-          }, 2400);
+          }, 2800);
 
           return () => {
             clearTimeout(startTimer);
             clearTimeout(readyTimer);
           };
+        } else {
+          setTrailerKey(null);
+          setIsPlayingVideo(false);
+          setIsVideoReady(false);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setTrailerKey(null);
+        setIsPlayingVideo(false);
+        setIsVideoReady(false);
+      });
   }, [item, type]);
+
+  // Listen for YouTube iframe error messages to gracefully fall back to backdrop poster
+  useEffect(() => {
+    const handleWindowMessage = (e) => {
+      try {
+        if (typeof e.data === 'string') {
+          const parsed = JSON.parse(e.data);
+          if (parsed.event === 'onError' || parsed.info === 101 || parsed.info === 150) {
+            setIsPlayingVideo(false);
+            setIsVideoReady(false);
+          }
+        }
+      } catch (_) {}
+    };
+    window.addEventListener('message', handleWindowMessage);
+    return () => window.removeEventListener('message', handleWindowMessage);
+  }, []);
 
   // Listen to My List updates
   useEffect(() => {
@@ -83,6 +113,28 @@ export default function HeroBillboard({ item, type = 'movie', onOpenQuickView })
   const handlePlayClick = () => {
     playCinematicIntroSound();
     navigate(`/watch/${mediaType}/${item.id}`);
+  };
+
+  // Toggle trailer playback smoothly via postMessage
+  const handleTogglePlayPause = (e) => {
+    e.stopPropagation();
+    const nextPaused = !isTrailerPaused;
+    setIsTrailerPaused(nextPaused);
+
+    if (iframeRef.current?.contentWindow) {
+      try {
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({
+            event: 'command',
+            func: nextPaused ? 'pauseVideo' : 'playVideo',
+            args: []
+          }),
+          '*'
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    }
   };
 
   // Toggle audio seamlessly via postMessage without reloading iframe (which causes YouTube to show controls)
@@ -118,12 +170,12 @@ export default function HeroBillboard({ item, type = 'movie', onOpenQuickView })
           className={`billboard-backdrop-img ${isVideoReady ? 'video-active' : ''}`}
         />
 
-        {/* Netflix Auto-playing Video Trailer (Guarded against any play/pause/seek controls) */}
+        {/* Netflix Auto-playing Video Trailer (Clean, cinematic background trailer without native overlays) */}
         {isPlayingVideo && trailerKey && (
-          <div className={`billboard-video-wrapper ${isVideoReady ? 'ready' : 'buffering'}`}>
+          <div className={`billboard-video-wrapper ${isVideoReady && !isTrailerPaused ? 'ready' : 'buffering'}`}>
             <iframe
               ref={iframeRef}
-              src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailerKey}&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&autohide=1&enablejsapi=1&origin=${typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : ''}`}
+              src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&rel=0&loop=1&playlist=${trailerKey}&enablejsapi=1&iv_load_policy=3&disablekb=1&modestbranding=1`}
               title={title}
               frameBorder="0"
               tabIndex="-1"
@@ -199,6 +251,18 @@ export default function HeroBillboard({ item, type = 'movie', onOpenQuickView })
             {inList ? <Check size={18} /> : <Plus size={18} />}
             <span>{inList ? 'In My List' : 'My List'}</span>
           </button>
+
+          {/* Play / Pause Toggle Button for Billboard Trailer */}
+          {trailerKey && isPlayingVideo && isVideoReady && (
+            <button 
+              className="billboard-sound-btn" 
+              onClick={handleTogglePlayPause}
+              title={isTrailerPaused ? 'Play Trailer' : 'Pause Trailer'}
+              aria-label="Toggle Trailer Playback"
+            >
+              {isTrailerPaused ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}
+            </button>
+          )}
 
           {/* Sound Mute / Unmute Button for Trailer */}
           {trailerKey && isPlayingVideo && (
