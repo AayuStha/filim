@@ -4,6 +4,7 @@ import { Play, Plus, Check, Star, ArrowLeft, Tv, Film, Eye, User, Sparkles, Chev
 import MovieRow from '../components/MovieRow';
 import { findFranchiseForMedia } from '../services/timelineService';
 import { isInMyList, toggleMyListStatus } from '../utils/myList';
+import { playCinematicIntroSound } from '../utils/soundEffects';
 
 const TMDB_API_KEY = 'f69f2c8f33e02716fb1c44a6941396f8';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
@@ -11,6 +12,22 @@ const TMDB_ORIGINAL_IMG = 'https://image.tmdb.org/t/p/original';
 const TMDB_POSTER_IMG = 'https://image.tmdb.org/t/p/w500';
 const TMDB_PROFILE_IMG = 'https://image.tmdb.org/t/p/w300';
 const TMDB_STILL_IMG = 'https://image.tmdb.org/t/p/w400';
+
+// Dynamic Movie-Adaptive Color Theming by Genre
+function getAdaptiveTheme(genres = []) {
+  if (!genres || genres.length === 0) {
+    return { accent: '#e50914', glow: 'rgba(229, 9, 20, 0.4)', name: 'Crimson' };
+  }
+  const ids = genres.map(g => g.id);
+  if (ids.includes(878)) return { accent: '#00f0ff', glow: 'rgba(0, 240, 255, 0.38)', name: 'Cyberpunk Cyan' };
+  if (ids.includes(14) || ids.includes(9648)) return { accent: '#a855f7', glow: 'rgba(168, 85, 247, 0.38)', name: 'Mystic Violet' };
+  if (ids.includes(16)) return { accent: '#f59e0b', glow: 'rgba(245, 158, 11, 0.38)', name: 'Solar Gold' };
+  if (ids.includes(35)) return { accent: '#10b981', glow: 'rgba(16, 185, 129, 0.38)', name: 'Emerald' };
+  if (ids.includes(10749)) return { accent: '#ec4899', glow: 'rgba(236, 72, 153, 0.38)', name: 'Neon Rose' };
+  if (ids.includes(27) || ids.includes(53)) return { accent: '#ef4444', glow: 'rgba(239, 68, 68, 0.42)', name: 'Blood Crimson' };
+  if (ids.includes(28)) return { accent: '#e50914', glow: 'rgba(229, 9, 20, 0.4)', name: 'Action Ember' };
+  return { accent: '#38bdf8', glow: 'rgba(56, 189, 248, 0.36)', name: 'Deep Azure' };
+}
 
 export default function DetailsPage() {
   const { type = 'movie', id } = useParams();
@@ -140,10 +157,22 @@ export default function DetailsPage() {
   const cast = (details.credits?.cast || []).slice(0, 24);
   const directors = (details.credits?.crew || []).filter(c => c.job === 'Director');
   const similarItems = details.similar?.results || [];
+  const theme = getAdaptiveTheme(details.genres);
+
+  const handleWatchNow = () => {
+    playCinematicIntroSound();
+    navigate(`/watch/${type}/${id}${type === 'tv' ? `?s=${selectedSeason}&e=1` : ''}`);
+  };
 
   return (
-    <div className="netflix-details-page">
-      {/* Immersive Backdrop Section */}
+    <div 
+      className="netflix-details-page"
+      style={{
+        '--theme-accent': theme.accent,
+        '--theme-glow': theme.glow
+      }}
+    >
+      {/* Immersive Backdrop Section with Movie-Adaptive Glow */}
       <div className="details-hero-backdrop">
         {details.backdrop_path ? (
           <img 
@@ -154,6 +183,11 @@ export default function DetailsPage() {
         ) : (
           <div className="details-backdrop-fallback" />
         )}
+        {/* Dynamic Genre Palette Halo */}
+        <div 
+          className="details-adaptive-halo" 
+          style={{ background: `radial-gradient(circle at 45% 25%, ${theme.glow} 0%, transparent 68%)` }} 
+        />
         <div className="details-vignette-overlay" />
         <div className="details-gradient-bottom" />
       </div>
@@ -225,7 +259,7 @@ export default function DetailsPage() {
             <div className="details-primary-actions">
               <button 
                 className="netflix-action-btn play"
-                onClick={() => navigate(`/watch/${type}/${id}${type === 'tv' ? `?s=${selectedSeason}&e=1` : ''}`)}
+                onClick={handleWatchNow}
               >
                 <Play size={20} fill="black" color="black" />
                 <span>Watch Now</span>

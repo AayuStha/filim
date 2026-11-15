@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Plus, Check, ChevronDown, Star } from 'lucide-react';
+import { Play, Plus, Check, ChevronDown, Star, Eye } from 'lucide-react';
 import { isInMyList, toggleMyListStatus } from '../utils/myList';
+import { playCinematicIntroSound } from '../utils/soundEffects';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w500';
 
-export default function MovieCard({ item, type = 'movie', rank = null, isLandscape = false }) {
+export default function MovieCard({ 
+  item, 
+  type = 'movie', 
+  rank = null, 
+  isLandscape = false,
+  onOpenQuickView = null
+}) {
   const navigate = useNavigate();
   const [inList, setInList] = useState(false);
 
@@ -44,8 +51,20 @@ export default function MovieCard({ item, type = 'movie', rank = null, isLandsca
     navigate(`/details/${mediaType}/${item.id}`);
   };
 
+  const handleQuickViewClick = (e) => {
+    e.stopPropagation();
+    if (onOpenQuickView) {
+      onOpenQuickView(item, mediaType);
+    } else {
+      window.dispatchEvent(new CustomEvent('aayush_open_quickview', { 
+        detail: { item, type: mediaType } 
+      }));
+    }
+  };
+
   const handlePlayClick = (e) => {
     e.stopPropagation();
+    playCinematicIntroSound();
     navigate(`/watch/${mediaType}/${item.id}`);
   };
 
@@ -92,12 +111,20 @@ export default function MovieCard({ item, type = 'movie', rank = null, isLandsca
               >
                 {inList ? <Check size={15} /> : <Plus size={15} />}
               </button>
+              <button 
+                className="hover-btn icon-outline-btn quick-view-trigger" 
+                onClick={handleQuickViewClick}
+                title="Quick View Preview"
+                aria-label="Quick View Preview"
+              >
+                <Eye size={15} />
+              </button>
             </div>
             <div className="actions-right">
               <button 
                 className="hover-btn icon-outline-btn" 
                 onClick={handleCardClick}
-                title="Details & info"
+                title="Full Details"
                 aria-label="More Info"
               >
                 <ChevronDown size={15} />

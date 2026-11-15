@@ -2,13 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeft, Server, ChevronLeft, ChevronRight, RotateCcw, 
-  List, Sparkles, Check, Play, Tv, X, ChevronDown 
+  List, Sparkles, Check, Play, Tv, X, ChevronDown, SunMedium,
+  Clock, FastForward
 } from 'lucide-react';
 import { findFranchiseForMedia } from '../services/timelineService';
+import { playCinematicIntroSound } from '../utils/soundEffects';
 
 const TMDB_API_KEY = 'f69f2c8f33e02716fb1c44a6941396f8';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_STILL_IMG = 'https://image.tmdb.org/t/p/w300';
+const TMDB_STILL_HD = 'https://image.tmdb.org/t/p/w500';
 
 // High-speed, 4K & 1080p verified video streaming servers
 const VIDEO_SERVERS = [
@@ -132,6 +135,22 @@ export default function WatchPage() {
   const [iframeKey, setIframeKey] = useState(Date.now());
   const [timelineData, setTimelineData] = useState(null);
 
+  // Creative & Professional Features: Ambient Theater Glow & Auto Next Card
+  const [theaterGlow, setTheaterGlow] = useState(() => {
+    try {
+      return localStorage.getItem('aayush_theater_glow') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+  const [showUpNextCard, setShowUpNextCard] = useState(false);
+  const [upNextCountdown, setUpNextCountdown] = useState(15);
+
+  // Play cinematic intro sound when entering player
+  useEffect(() => {
+    playCinematicIntroSound();
+  }, [id, season, episode]);
+
   // Episode Browser State
   const [activeDrawerSeason, setActiveDrawerSeason] = useState(Number(season));
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
@@ -185,58 +204,109 @@ export default function WatchPage() {
     }
   }, [isEpisodeDrawerOpen, activeDrawerSeason, season, episode]);
 
-  // Escape key listener to close drawer & server popover
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setIsEpisodeDrawerOpen(false);
-        setIsServerMenuOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Save progress to local storage
-  const saveWatchHistory = (data) => {
-    if (!data || !data.id) return;
-    try {
-      let history = JSON.parse(localStorage.getItem('aayush_watch_history') || localStorage.getItem('cinestream_history') || '[]');
-      history = history.filter(item => !(item.id === data.id && item.type === type));
-
-      history.unshift({
-        id: data.id,
-        type,
-        title: data.title || data.name || 'Untitled',
-        poster_path: data.poster_path,
-        backdrop_path: data.backdrop_path,
-        season: type === 'tv' ? season : null,
-        episode: type === 'tv' ? episode : null,
-        vote_average: data.vote_average,
-        timestamp: Date.now()
-      });
-
-      if (history.length > 25) history = history.slice(0, 25);
-      localStorage.setItem('aayush_watch_history', JSON.stringify(history));
-    } catch (e) {
-      console.error('Failed to save history:', e);
-    }
-  };
-
   const currentServer = VIDEO_SERVERS[currentServerIndex] || VIDEO_SERVERS[0];
   const embedUrl = currentServer.getUrl(type, id, season, episode);
 
   const title = mediaDetails ? (mediaDetails.title || mediaDetails.name) : 'Loading...';
   const currentEpNum = parseInt(episode, 10);
   const totalEpsInSeason = seasonEpisodes.length;
+  const nextEpisode = type === 'tv' ? seasonEpisodes.find(ep => ep.episode_number === currentEpNum + 1) : null;
 
   const navigateEpisode = (delta) => {
     const nextEp = currentEpNum + delta;
     if (nextEp >= 1 && (totalEpsInSeason === 0 || nextEp <= totalEpsInSeason)) {
+      playCinematicIntroSound();
       setSearchParams({ s: season, e: String(nextEp) });
+      setIframeKey(Date.now());
+      setShowUpNextCard(false);
+      setUpNextCountdown(15);
+    }
+  };
+
+  const handlePlayNextEpisode = () => {
+    if (nextEpisode) {
+      playCinematicIntroSound();
+      setShowUpNextCard(false);
+      setUpNextCountdown(15);
+      setSearchParams({ s: season, e: String(nextEpisode.episode_number) });
       setIframeKey(Date.now());
     }
   };
+
+  // Up Next Countdown Effect
+  useEffect(() => {
+    if (!showUpNextCard) return;
+    if (upNextCountdown <= 0) {
+      handlePlayNextEpisode();
+      return;
+    }
+    const timer = setInterval(() => {
+      setUpNextCountdown(c => c - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [showUpNextCard, upNextCountdown, nextEpisode]);
+
+  // Comprehensive Player Keyboard Hotkeys (G, S, E, N, P, ?, Esc)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      if (activeTag === 'input' || activeTag === 'textarea') return;
+
+      if (e.key === 'Escape') {
+        setIsEpisodeDrawerOpen(false);
+        setIsServerMenuOpen(false);
+        setShowUpNextCard(false);
+      } else if (e.key === 'g' || e.key === 'G') {
+        e.preventDefault();
+        setTheaterGlow(prev => {
+          const next = !prev;
+          localStorage.setItem('aayush_theater_glow', next ? 'true' : 'false');
+          return next;
+        });
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        setIsServerMenuOpen(prev => !prev);
+      } else if (e.key === 'e' || e.key === 'E') {
+        if (type === 'tv') {
+          e.preventDefault();
+          setIsEpisodeDrawerOpen(prev => !prev);
+        }
+      } else if (e.key === 'n' || e.key === 'N') {
+        if (type === 'tv') {
+          e.preventDefault();
+          if (nextEpisode && !showUpNextCard) {
+            setShowUpNextCard(true);
+            setUpNextCountdown(10);
+          } else {
+            navigateEpisode(1);
+          }
+        }
+      } else if (e.key === 'p' || e.key === 'P') {
+        if (type === 'tv') {
+          e.preventDefault();
+          navigateEpisode(-1);
+        }
+      } else if (e.key === '?') {
+        e.preventDefault();
+        window.dispatchEvent(new Event('aayush_open_hotkeys'));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [type, currentEpNum, totalEpsInSeason, nextEpisode, showUpNextCard]);
+
+  // Adaptive Theater Glow Halo Color based on Media Genre
+  const adaptiveGlowColor = (() => {
+    const genres = mediaDetails?.genres || [];
+    const ids = genres.map(g => g.id);
+    if (ids.includes(878)) return 'rgba(0, 240, 255, 0.45)';
+    if (ids.includes(14) || ids.includes(9648)) return 'rgba(168, 85, 247, 0.45)';
+    if (ids.includes(16)) return 'rgba(245, 158, 11, 0.45)';
+    if (ids.includes(35)) return 'rgba(16, 185, 129, 0.45)';
+    if (ids.includes(10749)) return 'rgba(236, 72, 153, 0.45)';
+    if (ids.includes(27) || ids.includes(53)) return 'rgba(239, 68, 68, 0.5)';
+    return 'rgba(229, 9, 20, 0.45)';
+  })();
 
   const handleSelectEpisode = (seasonNum, epNum) => {
     setSearchParams({ s: String(seasonNum), e: String(epNum) });
@@ -324,6 +394,37 @@ export default function WatchPage() {
             </div>
           )}
 
+          {/* Dynamic Ambient Theater Glow Toggle Button */}
+          <button 
+            className={`watch-glow-toggle-btn ${theaterGlow ? 'active' : ''}`}
+            onClick={() => {
+              const next = !theaterGlow;
+              setTheaterGlow(next);
+              localStorage.setItem('aayush_theater_glow', next ? 'true' : 'false');
+            }}
+            title="Dynamic Ambient Theater Glow [G]"
+            aria-label="Toggle Theater Glow"
+          >
+            <SunMedium size={16} />
+            <span className="glow-btn-label">Glow</span>
+          </button>
+
+          {/* Up Next Episode Trigger for TV */}
+          {type === 'tv' && nextEpisode && (
+            <button 
+              className={`watch-up-next-peek-btn ${showUpNextCard ? 'active' : ''}`}
+              onClick={() => {
+                setShowUpNextCard(!showUpNextCard);
+                setUpNextCountdown(12);
+              }}
+              title="Next Episode Preview [N]"
+              aria-label="Next Episode Preview"
+            >
+              <FastForward size={14} />
+              <span className="up-next-peek-text">Next Ep</span>
+            </button>
+          )}
+
           {/* Player Reload */}
           <button 
             className="minimal-icon-btn"
@@ -339,7 +440,7 @@ export default function WatchPage() {
             <button 
               className="server-badge-toggle"
               onClick={() => setIsServerMenuOpen(!isServerMenuOpen)}
-              title="Change Video Server"
+              title="Change Video Server [S]"
               aria-label="Select Video Server"
             >
               <span className="server-dot" />
@@ -377,6 +478,17 @@ export default function WatchPage() {
 
       {/* Main Video Viewport & Episode Browser Drawer */}
       <div className="watch-player-stage">
+        {/* Dynamic Ambient "Theater Glow" Backdrop Layer */}
+        {theaterGlow && (
+          <div 
+            className="watch-ambient-glow"
+            style={{
+              '--glow-color': adaptiveGlowColor
+            }}
+            aria-hidden="true"
+          />
+        )}
+
         <iframe 
           key={iframeKey}
           src={embedUrl} 
@@ -387,6 +499,63 @@ export default function WatchPage() {
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           className="watch-cinema-iframe"
         />
+
+        {/* Auto "Next Episode" Ending Card Floating Overlay */}
+        {type === 'tv' && nextEpisode && showUpNextCard && (
+          <div className="watch-up-next-card">
+            <button 
+              className="up-next-close-btn" 
+              onClick={() => setShowUpNextCard(false)} 
+              title="Stay on Episode (Esc)"
+              aria-label="Dismiss up next card"
+            >
+              <X size={15} />
+            </button>
+
+            <div className="up-next-header-tag">
+              <Sparkles size={13} className="sparkle-accent" />
+              <span>NEXT EPISODE IN {upNextCountdown}s</span>
+            </div>
+
+            <div className="up-next-content-row">
+              <div className="up-next-thumb-wrapper" onClick={handlePlayNextEpisode}>
+                <img 
+                  src={nextEpisode.still_path ? `${TMDB_STILL_HD}${nextEpisode.still_path}` : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=400&q=80'} 
+                  alt={nextEpisode.name} 
+                  className="up-next-thumb-img"
+                  onError={(e) => {
+                    e.target.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=400&q=80';
+                  }}
+                />
+                {nextEpisode.runtime && <span className="up-next-duration">{nextEpisode.runtime}m</span>}
+                <div className="up-next-thumb-play-icon">
+                  <Play size={16} fill="white" />
+                </div>
+              </div>
+
+              <div className="up-next-info-col">
+                <span className="up-next-ep-num">Season {season} • Episode {nextEpisode.episode_number}</span>
+                <h4 className="up-next-ep-title">{nextEpisode.name || `Episode ${nextEpisode.episode_number}`}</h4>
+                <div className="up-next-progress-bar">
+                  <div 
+                    className="up-next-progress-fill" 
+                    style={{ width: `${Math.min(100, Math.max(0, ((15 - upNextCountdown) / 15) * 100))}%` }} 
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="up-next-actions-row">
+              <button className="up-next-play-btn" onClick={handlePlayNextEpisode}>
+                <Play size={15} fill="black" />
+                <span>Play Now ({upNextCountdown}s)</span>
+              </button>
+              <button className="up-next-dismiss-btn" onClick={() => setShowUpNextCard(false)}>
+                Stay
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Ambient Blurred Backdrop when Episode Browser is open */}
         {type === 'tv' && isEpisodeDrawerOpen && (

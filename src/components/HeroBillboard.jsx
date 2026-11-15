@@ -2,15 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, Info, Plus, Check, Volume2, VolumeX, Flame } from 'lucide-react';
 import { isInMyList, toggleMyListStatus } from '../utils/myList';
+import { playCinematicIntroSound } from '../utils/soundEffects';
 
 const TMDB_API_KEY = 'f69f2c8f33e02716fb1c44a6941396f8';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_ORIGINAL_IMG = 'https://image.tmdb.org/t/p/original';
 
-export default function HeroBillboard({ item, type = 'movie' }) {
+export default function HeroBillboard({ item, type = 'movie', onOpenQuickView }) {
   const navigate = useNavigate();
   const [trailerKey, setTrailerKey] = useState(null);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [inList, setInList] = useState(false);
   const iframeRef = useRef(null);
@@ -21,6 +23,7 @@ export default function HeroBillboard({ item, type = 'movie' }) {
     setInList(isInMyList(item.id));
     setTrailerKey(null);
     setIsPlayingVideo(false);
+    setIsVideoReady(false);
     setIsMuted(true);
 
     // Fetch trailer from TMDB
@@ -37,11 +40,20 @@ export default function HeroBillboard({ item, type = 'movie' }) {
 
         if (trailer?.key) {
           setTrailerKey(trailer.key);
-          // Auto-start video trailer like Netflix after 1.2s delay
-          const timer = setTimeout(() => {
+          // Auto-start video trailer silently behind poster, fade in only after buffering finishes
+          const startTimer = setTimeout(() => {
             setIsPlayingVideo(true);
-          }, 1200);
-          return () => clearTimeout(timer);
+          }, 1000);
+
+          // Grace period: Wait until YouTube starts rendering video frames to hide player controls
+          const readyTimer = setTimeout(() => {
+            setIsVideoReady(true);
+          }, 2400);
+
+          return () => {
+            clearTimeout(startTimer);
+            clearTimeout(readyTimer);
+          };
         }
       })
       .catch(() => {});
@@ -66,6 +78,11 @@ export default function HeroBillboard({ item, type = 'movie' }) {
   const handleToggleList = () => {
     const newStatus = toggleMyListStatus(item, mediaType);
     setInList(newStatus);
+  };
+
+  const handlePlayClick = () => {
+    playCinematicIntroSound();
+    navigate(`/watch/${mediaType}/${item.id}`);
   };
 
   // Toggle audio seamlessly via postMessage without reloading iframe (which causes YouTube to show controls)
@@ -94,19 +111,19 @@ export default function HeroBillboard({ item, type = 'movie' }) {
     <section className="netflix-billboard">
       {/* Background Media Container (Backdrop Image & YouTube Autoplay Trailer) */}
       <div className="billboard-backdrop-container">
-        {/* High-Res Static Backdrop Poster */}
+        {/* High-Res Static Backdrop Poster (stays visible until video is buffered to prevent controls flash) */}
         <img 
           src={item.backdrop_path ? `${TMDB_ORIGINAL_IMG}${item.backdrop_path}` : (item.poster_path ? `${TMDB_ORIGINAL_IMG}${item.poster_path}` : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><rect width="1920" height="1080" fill="%230b0b12"/></svg>')} 
           alt={title} 
-          className={`billboard-backdrop-img ${isPlayingVideo ? 'video-active' : ''}`}
+          className={`billboard-backdrop-img ${isVideoReady ? 'video-active' : ''}`}
         />
 
         {/* Netflix Auto-playing Video Trailer (Guarded against any play/pause/seek controls) */}
         {isPlayingVideo && trailerKey && (
-          <div className="billboard-video-wrapper">
+          <div className={`billboard-video-wrapper ${isVideoReady ? 'ready' : 'buffering'}`}>
             <iframe
               ref={iframeRef}
-              src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailerKey}&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&autohide=1&enablejsapi=1`}
+              src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailerKey}&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&autohide=1&enablejsapi=1&origin=${typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : ''}`}
               title={title}
               frameBorder="0"
               tabIndex="-1"
@@ -156,7 +173,7 @@ export default function HeroBillboard({ item, type = 'movie' }) {
         <div className="billboard-actions">
           <button 
             className="billboard-btn play-btn"
-            onClick={() => navigate(`/watch/${mediaType}/${item.id}`)}
+            onClick={handlePlayClick}
           >
             <Play size={20} fill="black" color="black" />
             <span>Play</span>
@@ -164,7 +181,10 @@ export default function HeroBillboard({ item, type = 'movie' }) {
 
           <button 
             className="billboard-btn info-btn"
-            onClick={() => navigate(`/details/${mediaType}/${item.id}`)}
+            onClick={() => {
+              if (onOpenQuickView) onOpenQuickView(item, mediaType);
+              else navigate(`/details/${mediaType}/${item.id}`);
+            }}
           >
             <Info size={20} />
             <span>More Info</span>

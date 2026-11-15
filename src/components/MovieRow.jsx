@@ -10,7 +10,8 @@ export default function MovieRow({
   type = 'movie', 
   isTop10 = false,
   isLandscape = false,
-  seeMoreLink = null 
+  seeMoreLink = null,
+  onOpenQuickView = null
 }) {
   const [items, setItems] = useState(propItems || []);
   const [isLoading, setIsLoading] = useState(!propItems && !!fetchUrl);
@@ -113,6 +114,7 @@ export default function MovieRow({
                 type={item.media_type || type}
                 rank={isTop10 ? index + 1 : null}
                 isLandscape={isLandscape}
+                onOpenQuickView={onOpenQuickView}
               />
             ))
           )}

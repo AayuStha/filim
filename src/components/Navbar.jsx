@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Compass, Film, Tv, Play, Check, Sparkles, Star, User, ArrowRight, Loader2 } from 'lucide-react';
+import { 
+  Search, Menu, X, Compass, Film, Tv, Play, Check, Sparkles, 
+  Star, User, ArrowRight, Loader2, Dices, HelpCircle, Volume2, 
+  VolumeX, Keyboard 
+} from 'lucide-react';
+import FilmRouletteModal from './FilmRouletteModal';
+import HotkeysModal from './HotkeysModal';
+import { isSoundEnabled, setSoundEnabled } from '../utils/soundEffects';
 
 const TMDB_API_KEY = 'f69f2c8f33e02716fb1c44a6941396f8';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
@@ -16,10 +23,35 @@ export default function Navbar() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Creative Modals & Features State
+  const [isRouletteOpen, setIsRouletteOpen] = useState(false);
+  const [isHotkeysOpen, setIsHotkeysOpen] = useState(false);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
+
   const navigate = useNavigate();
   const location = useLocation();
   const searchInputRef = useRef(null);
   const searchBoxRef = useRef(null);
+
+  // Sound preference change listener
+  useEffect(() => {
+    const handleSoundChange = () => setSoundOn(isSoundEnabled());
+    window.addEventListener('aayush_sound_setting_changed', handleSoundChange);
+    return () => window.removeEventListener('aayush_sound_setting_changed', handleSoundChange);
+  }, []);
+
+  // Global custom events listener
+  useEffect(() => {
+    const handleOpenRoulette = () => setIsRouletteOpen(true);
+    const handleOpenHotkeys = () => setIsHotkeysOpen(true);
+
+    window.addEventListener('aayush_open_roulette', handleOpenRoulette);
+    window.addEventListener('aayush_open_hotkeys', handleOpenHotkeys);
+    return () => {
+      window.removeEventListener('aayush_open_roulette', handleOpenRoulette);
+      window.removeEventListener('aayush_open_hotkeys', handleOpenHotkeys);
+    };
+  }, []);
 
   // Scroll listener for glassmorphism styling
   useEffect(() => {
@@ -54,18 +86,35 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Escape key handler
+  // Global Keyboard Shortcuts handler
   useEffect(() => {
     const handleKeyDown = (e) => {
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      const isInputActive = activeTag === 'input' || activeTag === 'textarea';
+
       if (e.key === 'Escape') {
         setShowSuggestions(false);
         if (isSearchOpen && !searchQuery.trim()) setIsSearchOpen(false);
         if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+        if (isRouletteOpen) setIsRouletteOpen(false);
+        if (isHotkeysOpen) setIsHotkeysOpen(false);
+      } else if (!isInputActive) {
+        if (e.key === '?') {
+          e.preventDefault();
+          setIsHotkeysOpen(prev => !prev);
+        } else if (e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          setIsRouletteOpen(prev => !prev);
+        } else if (e.key === '/') {
+          e.preventDefault();
+          setIsSearchOpen(true);
+          setTimeout(() => searchInputRef.current?.focus(), 50);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen, searchQuery, isMobileMenuOpen]);
+  }, [isSearchOpen, searchQuery, isMobileMenuOpen, isRouletteOpen, isHotkeysOpen]);
 
   // Live suggestions query (Triggered as soon as 1+ characters are typed)
   useEffect(() => {
@@ -335,6 +384,37 @@ export default function Navbar() {
             )}
           </div>
 
+          {/* Surprise Me / Film Roulette Button */}
+          <button 
+            className="nav-roulette-pill-btn"
+            onClick={() => setIsRouletteOpen(true)}
+            title="Surprise Me (Film Roulette) [R]"
+            aria-label="Surprise Me"
+          >
+            <Dices size={16} className="nav-dice-icon" />
+            <span className="nav-btn-text">Surprise Me</span>
+          </button>
+
+          {/* Sound FX Toggle Button */}
+          <button 
+            className={`nav-utility-icon-btn ${soundOn ? 'sound-on' : 'sound-off'}`}
+            onClick={() => setSoundEnabled(!soundOn)}
+            title={soundOn ? 'Cinematic Audio FX: On' : 'Cinematic Audio FX: Off'}
+            aria-label="Toggle Sound Effects"
+          >
+            {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          </button>
+
+          {/* Keyboard Shortcuts Button */}
+          <button 
+            className="nav-utility-icon-btn"
+            onClick={() => setIsHotkeysOpen(true)}
+            title="Keyboard Shortcuts [?]"
+            aria-label="Keyboard Shortcuts"
+          >
+            <Keyboard size={18} />
+          </button>
+
           {/* Mobile Menu Button */}
           <button 
             className="mobile-hamburger-btn" 
@@ -376,6 +456,24 @@ export default function Navbar() {
               <Link to="/browse/mylist" className={`mobile-nav-link ${isActive('/browse/mylist') ? 'active' : ''}`}>
                 <Check size={18} /> My List
               </Link>
+              <div 
+                className="mobile-nav-link action-trigger"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsRouletteOpen(true);
+                }}
+              >
+                <Dices size={18} /> Surprise Me (Roulette)
+              </div>
+              <div 
+                className="mobile-nav-link action-trigger"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsHotkeysOpen(true);
+                }}
+              >
+                <Keyboard size={18} /> Keyboard Shortcuts
+              </div>
             </div>
 
             <div className="mobile-drawer-genres">
@@ -395,6 +493,16 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Global Interactive Creative Modals */}
+      <FilmRouletteModal 
+        isOpen={isRouletteOpen} 
+        onClose={() => setIsRouletteOpen(false)} 
+      />
+      <HotkeysModal 
+        isOpen={isHotkeysOpen} 
+        onClose={() => setIsHotkeysOpen(false)} 
+      />
     </header>
   );
 }

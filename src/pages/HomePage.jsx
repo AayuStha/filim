@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import HeroBillboard from '../components/HeroBillboard';
 import MovieRow from '../components/MovieRow';
+import QuickViewModal from '../components/QuickViewModal';
 import { getMyList } from '../utils/myList';
 
 const TMDB_API_KEY = 'f69f2c8f33e02716fb1c44a6941396f8';
@@ -18,6 +19,24 @@ export default function HomePage() {
   const [heroItem, setHeroItem] = useState(null);
   const [continueWatching, setContinueWatching] = useState([]);
   const [myList, setMyList] = useState([]);
+  const [quickViewItem, setQuickViewItem] = useState(null);
+  const [quickViewType, setQuickViewType] = useState('movie');
+
+  const handleOpenQuickView = (item, type = 'movie') => {
+    setQuickViewItem(item);
+    setQuickViewType(item?.media_type || type);
+  };
+
+  // Global listener for quickview events
+  useEffect(() => {
+    const handleQuickViewEvent = (e) => {
+      if (e.detail?.item) {
+        handleOpenQuickView(e.detail.item, e.detail.type || 'movie');
+      }
+    };
+    window.addEventListener('aayush_open_quickview', handleQuickViewEvent);
+    return () => window.removeEventListener('aayush_open_quickview', handleQuickViewEvent);
+  }, []);
 
   // Fetch Hero Banner item based on current page mode
   useEffect(() => {
@@ -60,7 +79,11 @@ export default function HomePage() {
     <div className="netflix-home-page">
       {/* Auto-playing Trailer Hero Billboard */}
       {heroItem && (
-        <HeroBillboard item={heroItem} type={defaultType} />
+        <HeroBillboard 
+          item={heroItem} 
+          type={defaultType} 
+          onOpenQuickView={handleOpenQuickView} 
+        />
       )}
 
       {/* Quick Category Chips Strip */}
@@ -91,6 +114,7 @@ export default function HomePage() {
               media_type: c.type || 'movie'
             }))}
             isLandscape={false}
+            onOpenQuickView={handleOpenQuickView}
           />
         )}
 
@@ -101,6 +125,7 @@ export default function HomePage() {
             items={myList}
             isLandscape={false}
             seeMoreLink="/browse/mylist"
+            onOpenQuickView={handleOpenQuickView}
           />
         )}
 
@@ -110,6 +135,7 @@ export default function HomePage() {
           fetchUrl={`${TMDB_BASE}/trending/${defaultType}/day?api_key=${TMDB_API_KEY}`}
           type={defaultType}
           isTop10={true}
+          onOpenQuickView={handleOpenQuickView}
         />
 
         {/* Trending Now */}
@@ -117,6 +143,7 @@ export default function HomePage() {
           title="Trending Now"
           fetchUrl={`${TMDB_BASE}/trending/${defaultType}/week?api_key=${TMDB_API_KEY}`}
           type={defaultType}
+          onOpenQuickView={handleOpenQuickView}
         />
 
         {/* Popular on AAYUSH */}
@@ -124,6 +151,7 @@ export default function HomePage() {
           title="Popular on AAYUSH"
           fetchUrl={`${TMDB_BASE}/${defaultType}/popular?api_key=${TMDB_API_KEY}`}
           type={defaultType}
+          onOpenQuickView={handleOpenQuickView}
         />
 
         {/* Blockbuster Action Thrillers */}
@@ -132,6 +160,7 @@ export default function HomePage() {
           fetchUrl={`${TMDB_BASE}/discover/${defaultType}?api_key=${TMDB_API_KEY}&with_genres=28&sort_by=popularity.desc`}
           type={defaultType}
           seeMoreLink="/genre/28?name=Action&type=movie"
+          onOpenQuickView={handleOpenQuickView}
         />
 
         {/* Top Rated Masterpieces */}
@@ -139,6 +168,7 @@ export default function HomePage() {
           title="Critically Acclaimed Masterpieces"
           fetchUrl={`${TMDB_BASE}/${defaultType}/top_rated?api_key=${TMDB_API_KEY}`}
           type={defaultType}
+          onOpenQuickView={handleOpenQuickView}
         />
 
         {/* Sci-Fi & Cyberpunk Hits */}
@@ -147,6 +177,7 @@ export default function HomePage() {
           fetchUrl={`${TMDB_BASE}/discover/${defaultType}?api_key=${TMDB_API_KEY}&with_genres=878&sort_by=popularity.desc`}
           type={defaultType}
           seeMoreLink="/genre/878?name=Sci-Fi&type=movie"
+          onOpenQuickView={handleOpenQuickView}
         />
 
         {/* Comedies & Feel-Good */}
@@ -155,6 +186,7 @@ export default function HomePage() {
           fetchUrl={`${TMDB_BASE}/discover/${defaultType}?api_key=${TMDB_API_KEY}&with_genres=35&sort_by=popularity.desc`}
           type={defaultType}
           seeMoreLink="/genre/35?name=Comedy&type=movie"
+          onOpenQuickView={handleOpenQuickView}
         />
 
         {/* Psychological Horror & Suspense */}
@@ -163,8 +195,17 @@ export default function HomePage() {
           fetchUrl={`${TMDB_BASE}/discover/${defaultType}?api_key=${TMDB_API_KEY}&with_genres=27&sort_by=popularity.desc`}
           type={defaultType}
           seeMoreLink="/genre/27?name=Horror&type=movie"
+          onOpenQuickView={handleOpenQuickView}
         />
       </div>
+
+      {/* Interactive Quick-View Modal */}
+      <QuickViewModal 
+        item={quickViewItem}
+        type={quickViewType}
+        isOpen={!!quickViewItem}
+        onClose={() => setQuickViewItem(null)}
+      />
     </div>
   );
 }
