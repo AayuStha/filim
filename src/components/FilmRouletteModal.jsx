@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { X, Play, RotateCw, Sparkles, Star, Film, Check, Plus } from 'lucide-react';
+import { X, Play, RotateCw, Sparkles, Star, Film, Check, Plus, Info } from 'lucide-react';
 import { playRouletteClickSound, playWinnerChimeSound, playCinematicIntroSound } from '../utils/soundEffects';
 import { isInMyList, toggleMyListStatus } from '../utils/myList';
 
@@ -100,6 +100,13 @@ export default function FilmRouletteModal({ isOpen, onClose }) {
     setInList(status);
   };
 
+  const handleViewDetails = () => {
+    if (!selectedItem) return;
+    onClose();
+    const mediaType = selectedItem.media_type || (selectedItem.name ? 'tv' : 'movie');
+    navigate(`/details/${mediaType}/${selectedItem.id}`);
+  };
+
   if (!isOpen) return null;
 
   const currentDisplay = selectedItem || candidates[currentIndex] || null;
@@ -122,15 +129,30 @@ export default function FilmRouletteModal({ isOpen, onClose }) {
           )}
           <div className="roulette-stage-gradient" />
 
-          {/* Top Bar with Badge and Close Button */}
+          {/* Top Bar with Badge, Spin Again, and Close Button */}
           <div className="roulette-stage-header">
             <div className="roulette-top-tag">
               <Sparkles size={13} className="tag-sparkle-icon" />
               <span>SURPRISE FILM ROULETTE</span>
             </div>
-            <button className="roulette-close-btn" onClick={onClose} aria-label="Close roulette">
-              <X size={18} />
-            </button>
+            <div className="roulette-top-actions">
+              <button 
+                className="roulette-circle-btn respin-circle-btn" 
+                onClick={() => startSpin()} 
+                disabled={isSpinning}
+                title="Spin Again"
+                aria-label="Spin Again"
+              >
+                <RotateCw size={16} className={isSpinning ? 'spinning-icon' : ''} />
+              </button>
+              <button 
+                className="roulette-circle-btn close-circle-btn" 
+                onClick={onClose} 
+                aria-label="Close roulette"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Rolling / Reel Spinning Centerpiece */}
@@ -190,7 +212,7 @@ export default function FilmRouletteModal({ isOpen, onClose }) {
                   : 'Handpicked award-winning feature film streaming in full 4K on AAYUSH.'}
               </p>
 
-              {/* Action Buttons Row */}
+              {/* Action Buttons Row (3 Buttons in One Line) */}
               <div className="roulette-actions-row">
                 <button 
                   className="roulette-btn play-btn"
@@ -211,13 +233,13 @@ export default function FilmRouletteModal({ isOpen, onClose }) {
                 </button>
 
                 <button 
-                  className="roulette-btn respin-btn"
-                  onClick={() => startSpin()}
+                  className="roulette-btn details-btn"
+                  onClick={handleViewDetails}
                   disabled={isSpinning}
-                  title="Spin Again"
+                  title="View Details"
                 >
-                  <RotateCw size={16} className={isSpinning ? 'spinning-icon' : ''} />
-                  <span>{isSpinning ? 'Rolling...' : 'Spin Again'}</span>
+                  <Info size={16} />
+                  <span>View Details</span>
                 </button>
               </div>
             </div>

@@ -7151,83 +7151,39 @@ img {
   position: fixed;
   inset: 0;
   z-index: 2500;
-  background: rgba(4, 4, 8, 0.94);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  /* Translucent frosted glass backdrop with soft cinematic blur */
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: clamp(16px, 4vh, 32px) 20px;
+  align-items: center;
+  padding: clamp(16px, 3vh, 32px) 20px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  animation: modalFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .roulette-modal-container {
   position: relative;
   width: 100%;
-  max-width: 620px;
-  margin: auto 0;
+  max-width: 650px;
+  margin: auto;
   display: flex;
   flex-direction: column;
-  background: #0d0e15;
+  background: #11121a;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 50px rgba(229, 9, 20, 0.25);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85), 0 0 50px rgba(229, 9, 20, 0.2);
   animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.roulette-close-btn {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 25;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(14, 14, 20, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #e5e5eb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.roulette-close-btn:hover {
-  background: rgba(229, 9, 20, 0.7);
-  border-color: #e50914;
-  color: #ffffff;
-  transform: scale(1.08);
-}
-
-.roulette-top-tag {
-  position: absolute;
-  top: 16px;
-  left: 18px;
-  z-index: 25;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: rgba(10, 10, 16, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 9999px;
-  padding: 4px 12px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #ff4d4d;
 }
 
 .roulette-stage {
   position: relative;
   width: 100%;
-  height: 230px;
-  background: #08080c;
+  height: 200px;
+  background: #090a10;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -7241,49 +7197,121 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: blur(8px) brightness(0.5);
-  transform: scale(1.08);
+  object-position: center 25%;
+  filter: brightness(0.65);
+  transform: scale(1.04);
   transition: all 0.5s ease;
 }
 
 .roulette-backdrop-img.spinning {
-  filter: blur(16px) brightness(0.35);
+  filter: blur(10px) brightness(0.4);
 }
 
-.roulette-vignette {
+.roulette-stage-gradient {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, transparent 30%, rgba(13, 14, 21, 0.95) 100%),
-              linear-gradient(180deg, rgba(13, 14, 21, 0.3) 0%, #0d0e15 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(17, 18, 26, 0.2) 50%, #11121a 100%);
+  pointer-events: none;
 }
 
-.roulette-poster-wrapper {
+.roulette-stage-header {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 16px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: auto;
+}
+
+.roulette-top-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(14, 15, 22, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #ff4d4d;
+}
+
+.roulette-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.roulette-circle-btn,
+.roulette-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(14, 15, 22, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e5e5eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.roulette-circle-btn:hover:not(:disabled),
+.roulette-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.roulette-circle-btn.respin-circle-btn:hover:not(:disabled) {
+  background: rgba(229, 9, 20, 0.25);
+  border-color: #e50914;
+  color: #ff5252;
+}
+
+.roulette-circle-btn.close-circle-btn:hover,
+.roulette-close-btn:hover {
+  background: rgba(229, 9, 20, 0.75);
+  border-color: #e50914;
+  color: #ffffff;
+}
+
+.roulette-circle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.roulette-spinning-center {
   position: relative;
   z-index: 10;
-  width: 120px;
-  height: 175px;
-  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.roulette-spin-poster-wrapper {
+  position: relative;
+  width: 105px;
+  height: 155px;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 2px solid rgba(229, 9, 20, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   background: #151622;
-  flex-shrink: 0;
-}
-
-.roulette-poster-wrapper.blur-pulse {
-  transform: scale(0.96);
-  border-color: rgba(229, 9, 20, 0.6);
   animation: rouletteReelSpin 0.14s infinite alternate ease-in-out;
-}
-
-.roulette-poster-wrapper.winner-glow {
-  transform: scale(1.06);
-  border-color: #ff3b3b;
-  box-shadow: 0 0 35px rgba(229, 9, 20, 0.65), 0 20px 40px rgba(0, 0, 0, 0.9);
 }
 
 @keyframes rouletteReelSpin {
@@ -7322,6 +7350,42 @@ img {
   to { transform: rotate(360deg); }
 }
 
+.roulette-content-box {
+  padding: 16px 26px 26px;
+  overflow-y: auto;
+}
+
+.roulette-card-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+}
+
+.roulette-winner-poster-wrap {
+  position: relative;
+  width: 125px;
+  height: 185px;
+  margin-top: 0;
+  z-index: 15;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+  background: #181926;
+  transition: transform 0.3s ease;
+}
+
+.roulette-winner-poster-wrap:hover {
+  transform: scale(1.03);
+}
+
+.roulette-winner-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .winner-badge-pill {
   position: absolute;
   bottom: 8px;
@@ -7329,26 +7393,26 @@ img {
   transform: translateX(-50%);
   background: linear-gradient(135deg, #e50914 0%, #ff5252 100%);
   color: #ffffff;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 800;
-  padding: 3px 10px;
+  padding: 3px 9px;
   border-radius: 9999px;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(229, 9, 20, 0.6);
 }
 
-.roulette-content-box {
-  padding: 20px 26px 24px;
-  overflow-y: auto;
+.roulette-info-column {
+  flex: 1;
+  min-width: 0;
 }
 
 .roulette-meta-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .roulette-match {
@@ -7382,24 +7446,24 @@ img {
 }
 
 .roulette-title {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #ffffff;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   line-height: 1.25;
 }
 
 .roulette-overview {
   color: #a1a1aa;
-  font-size: 0.92rem;
-  line-height: 1.55;
-  margin-bottom: 22px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
 }
 
 .roulette-actions-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -7407,10 +7471,10 @@ img {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 22px;
+  padding: 10px 20px;
   border-radius: 8px;
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
   border: none;
@@ -7422,42 +7486,70 @@ img {
 }
 
 .roulette-btn.play-btn:hover {
-  background: #e6e6e6;
+  background: rgba(255, 255, 255, 0.88);
   transform: scale(1.03);
 }
 
 .roulette-btn.list-btn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .roulette-btn.list-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.03);
 }
 
 .roulette-btn.list-btn.in-list {
-  background: rgba(70, 211, 105, 0.15);
-  border-color: rgba(70, 211, 105, 0.4);
+  background: rgba(70, 211, 105, 0.18);
+  border-color: #46d369;
   color: #46d369;
 }
 
-.roulette-btn.respin-btn {
-  background: linear-gradient(135deg, rgba(229, 9, 20, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+.roulette-btn.details-btn {
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  margin-left: auto;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.roulette-btn.details-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.03);
+}
+
+.roulette-btn.respin-btn {
+  background: rgba(229, 9, 20, 0.15);
+  border: 1px solid rgba(229, 9, 20, 0.4);
+  color: #ff4d4d;
 }
 
 .roulette-btn.respin-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(229, 9, 20, 0.4) 0%, rgba(139, 92, 246, 0.4) 100%);
-  border-color: rgba(255, 255, 255, 0.35);
-  transform: translateY(-1px);
+  background: rgba(229, 9, 20, 0.28);
+  border-color: #e50914;
+  color: #ffffff;
+  transform: scale(1.03);
 }
 
 .roulette-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .roulette-card-body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .roulette-winner-poster-wrap {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+  .roulette-meta-bar,
+  .roulette-actions-row {
+    justify-content: center;
+  }
 }
 
 /* ============================================================
