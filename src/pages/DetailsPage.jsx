@@ -149,7 +149,6 @@ export default function DetailsPage() {
   const releaseDate = details.release_date || details.first_air_date || '';
   const year = releaseDate ? releaseDate.split('-')[0] : '';
   const rating = details.vote_average ? details.vote_average.toFixed(1) : null;
-  const matchScore = details.vote_average ? Math.min(99, Math.round(details.vote_average * 10)) : null;
   const runtime = type === 'movie' 
     ? (details.runtime ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m` : null)
     : (details.number_of_seasons ? `${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}` : null);
@@ -229,7 +228,6 @@ export default function DetailsPage() {
 
             {/* Metadata Badges */}
             <div className="details-metrics-row">
-              {matchScore && <span className="match-percent">{matchScore}% Match</span>}
               <span className="badge-age">16+</span>
               {year && <span className="meta-text">{year}</span>}
               {runtime && <span className="meta-text">{runtime}</span>}

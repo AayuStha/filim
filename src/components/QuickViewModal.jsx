@@ -66,7 +66,6 @@ export default function QuickViewModal({ item, type = 'movie', isOpen, onClose }
   const title = currentData.title || currentData.name || 'Untitled';
   const year = (currentData.release_date || currentData.first_air_date || '').split('-')[0];
   const rating = currentData.vote_average ? currentData.vote_average.toFixed(1) : '7.8';
-  const matchScore = Math.min(99, Math.round((currentData.vote_average || 7.5) * 10) + 12);
   const runtime = currentData.runtime 
     ? `${Math.floor(currentData.runtime / 60)}h ${currentData.runtime % 60}m` 
     : (currentData.number_of_seasons ? `${currentData.number_of_seasons} Season${currentData.number_of_seasons > 1 ? 's' : ''}` : null);
@@ -163,7 +162,6 @@ export default function QuickViewModal({ item, type = 'movie', isOpen, onClose }
             {/* Left Column: Synopsis & Genres */}
             <div className="qv-left-col">
               <div className="qv-metrics-row">
-                <span className="qv-match-badge">{matchScore}% Match</span>
                 <span className="qv-age-badge">16+</span>
                 {year && <span className="qv-meta-year">{year}</span>}
                 {runtime && <span className="qv-meta-runtime">{runtime}</span>}

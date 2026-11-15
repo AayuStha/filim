@@ -114,11 +114,13 @@ img {
   right: 0;
   height: var(--netflix-nav-height);
   z-index: 1000;
-  /* Cinematic translucent gradient allowing billboard video to bleed seamlessly to top */
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.25) 60%, transparent 100%);
+  /* Completely seamless transparent header when at top of page, no hard lines or borders */
+  background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border-bottom: 1px solid transparent;
+  border: none;
+  border-bottom: none;
+  box-shadow: none;
   transition: background 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), backdrop-filter 0.4s ease, -webkit-backdrop-filter 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
@@ -717,55 +719,8 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 25%;
+  object-position: center 20%;
   z-index: 1;
-  transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.billboard-backdrop-img.video-active {
-  opacity: 0;
-}
-
-/* YouTube Video Background */
-.billboard-video-wrapper {
-  position: absolute;
-  top: -20%;
-  left: -10%;
-  width: 120%;
-  height: 140%;
-  pointer-events: none !important;
-  overflow: hidden;
-  z-index: 2;
-  opacity: 0;
-  transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.billboard-video-wrapper.ready {
-  opacity: 1;
-}
-
-.billboard-iframe {
-  width: 120vw;
-  height: 120vh;
-  min-width: 190vh; /* 16:9 aspect ratio */
-  min-height: 65vw;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(1.45);
-  border: none;
-  pointer-events: none !important;
-  user-select: none;
-}
-
-/* Touch and Click Barrier to prevent any play/pause/seek overlays */
-.billboard-touch-guard {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: auto;
-  background: transparent;
-  cursor: default;
 }
 
 /* Vignette Gradients */
@@ -774,6 +729,7 @@ img {
   inset: 0;
   background: linear-gradient(90deg, #141414 0%, rgba(20, 20, 20, 0.72) 32%, transparent 62%);
   z-index: 3;
+  pointer-events: none;
 }
 
 .billboard-vignette-bottom {
@@ -784,6 +740,7 @@ img {
   height: 180px;
   background: linear-gradient(180deg, transparent 0%, rgba(20, 20, 20, 0.6) 45%, #141414 100%);
   z-index: 3;
+  pointer-events: none;
 }
 
 .billboard-vignette-top {
@@ -791,9 +748,10 @@ img {
   top: 0;
   left: 0;
   right: 0;
-  height: 100px;
-  background: linear-gradient(180deg, rgba(10, 10, 14, 0.6) 0%, transparent 100%);
+  height: 160px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 45%, transparent 100%);
   z-index: 3;
+  pointer-events: none;
 }
 
 .billboard-content {
@@ -7381,7 +7339,8 @@ img {
 }
 
 .roulette-content-box {
-  padding: 24px 28px 28px;
+  padding: 20px 26px 24px;
+  overflow-y: auto;
 }
 
 .roulette-meta-bar {

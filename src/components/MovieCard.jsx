@@ -33,7 +33,6 @@ export default function MovieCard({
   const mediaType = item.media_type || type;
   const year = (item.release_date || item.first_air_date || '').split('-')[0] || '2024';
   const rating = item.vote_average ? item.vote_average.toFixed(1) : '7.8';
-  const matchScore = Math.min(99, Math.max(82, Math.round((item.vote_average || 7.5) * 10) + 12));
 
   const imageSrc = isLandscape && item.backdrop_path 
     ? `${TMDB_BACKDROP_BASE}${item.backdrop_path}` 
@@ -135,7 +134,6 @@ export default function MovieCard({
           <div className="hover-info">
             <h4 className="hover-title">{title}</h4>
             <div className="hover-meta-row">
-              <span className="match-score">{matchScore}%</span>
               <span className="age-badge">16+</span>
               <span className="media-year">{year}</span>
               <span className="quality-badge">HD</span>

@@ -107,23 +107,11 @@ export default function FilmRouletteModal({ isOpen, onClose }) {
   const mediaType = currentDisplay?.media_type || (currentDisplay?.name ? 'tv' : 'movie');
   const year = (currentDisplay?.release_date || currentDisplay?.first_air_date || '').split('-')[0];
   const rating = currentDisplay?.vote_average ? currentDisplay.vote_average.toFixed(1) : '8.5';
-  const matchScore = Math.min(99, Math.max(88, Math.round((currentDisplay?.vote_average || 8) * 10) + 12));
 
   return createPortal(
     <div className="roulette-modal-overlay" onClick={onClose}>
       <div className="roulette-modal-container" onClick={(e) => e.stopPropagation()}>
-        {/* Close Button */}
-        <button className="roulette-close-btn" onClick={onClose} aria-label="Close roulette">
-          <X size={20} />
-        </button>
-
-        {/* Modal Header */}
-        <div className="roulette-top-tag">
-          <Sparkles size={16} className="tag-sparkle-icon" />
-          <span>CINEMATIC FILM ROULETTE</span>
-        </div>
-
-        {/* Backdrop Visual Container */}
+        {/* Top Backdrop Stage */}
         <div className="roulette-stage">
           {currentDisplay?.backdrop_path && (
             <img 
@@ -132,84 +120,107 @@ export default function FilmRouletteModal({ isOpen, onClose }) {
               className={`roulette-backdrop-img ${isSpinning ? 'spinning' : 'settled'}`} 
             />
           )}
-          <div className="roulette-vignette" />
+          <div className="roulette-stage-gradient" />
 
-          {/* Center Poster Card (Flipping reel effect while spinning) */}
-          <div className={`roulette-poster-wrapper ${isSpinning ? 'blur-pulse' : 'winner-glow'}`}>
-            {currentDisplay?.poster_path ? (
-              <img 
-                src={`${TMDB_POSTER}${currentDisplay.poster_path}`} 
-                alt={title} 
-                className="roulette-poster-img"
-              />
-            ) : (
-              <div className="roulette-poster-placeholder">
-                <Film size={48} />
-              </div>
-            )}
-            {isSpinning && (
-              <div className="roulette-rolling-indicator">
-                <RotateCw size={28} className="rolling-spinner" />
-                <span>ROLLING...</span>
-              </div>
-            )}
-            {!isSpinning && selectedItem && (
-              <div className="winner-badge-pill">
-                <span>TODAY'S PICK</span>
-              </div>
-            )}
+          {/* Top Bar with Badge and Close Button */}
+          <div className="roulette-stage-header">
+            <div className="roulette-top-tag">
+              <Sparkles size={13} className="tag-sparkle-icon" />
+              <span>SURPRISE FILM ROULETTE</span>
+            </div>
+            <button className="roulette-close-btn" onClick={onClose} aria-label="Close roulette">
+              <X size={18} />
+            </button>
           </div>
+
+          {/* Rolling / Reel Spinning Centerpiece */}
+          {isSpinning && (
+            <div className="roulette-spinning-center">
+              <div className="roulette-spin-poster-wrapper blur-pulse">
+                {currentDisplay?.poster_path ? (
+                  <img 
+                    src={`${TMDB_POSTER}${currentDisplay.poster_path}`} 
+                    alt={title} 
+                    className="roulette-poster-img"
+                  />
+                ) : (
+                  <div className="roulette-poster-placeholder">
+                    <Film size={36} />
+                  </div>
+                )}
+                <div className="roulette-rolling-indicator">
+                  <RotateCw size={24} className="rolling-spinner" />
+                  <span>ROLLING...</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Content & Details Section */}
         <div className="roulette-content-box">
-          <div className="roulette-meta-bar">
-            <span className="roulette-match">{matchScore}% Match</span>
-            <span className="roulette-badge-type">{mediaType === 'tv' ? 'Series' : 'Movie'}</span>
-            {year && <span className="roulette-year">{year}</span>}
-            <span className="roulette-badge-uhd">4K UHD</span>
-            <span className="roulette-rating">
-              <Star size={13} fill="#f5c518" color="#f5c518" /> {rating}
-            </span>
-          </div>
+          <div className="roulette-card-body">
+            {/* Settled Winning Poster (overlapping nicely) */}
+            {!isSpinning && currentDisplay?.poster_path && (
+              <div className="roulette-winner-poster-wrap">
+                <img 
+                  src={`${TMDB_POSTER}${currentDisplay.poster_path}`} 
+                  alt={title} 
+                  className="roulette-winner-poster"
+                />
+                <span className="winner-badge-pill">TODAY'S PICK</span>
+              </div>
+            )}
 
-          <h2 className="roulette-title">{title}</h2>
+            <div className="roulette-info-column">
+              <div className="roulette-meta-bar">
+                <span className="roulette-badge-type">{mediaType === 'tv' ? 'Series' : 'Movie'}</span>
+                {year && <span className="roulette-year">{year}</span>}
+                <span className="roulette-badge-uhd">4K UHD</span>
+                <span className="roulette-rating">
+                  <Star size={13} fill="#f5c518" color="#f5c518" /> {rating}
+                </span>
+              </div>
 
-          <p className="roulette-overview">
-            {currentDisplay?.overview 
-              ? (currentDisplay.overview.length > 180 ? currentDisplay.overview.slice(0, 180) + '...' : currentDisplay.overview)
-              : 'Handpicked award-winning feature film streaming in full 4K on AAYUSH.'}
-          </p>
+              <h2 className="roulette-title">{title}</h2>
 
-          {/* Action Row */}
-          <div className="roulette-actions-row">
-            <button 
-              className="roulette-btn play-btn"
-              onClick={handleWatchNow}
-              disabled={isSpinning}
-            >
-              <Play size={18} fill="black" />
-              <span>Watch Now</span>
-            </button>
+              <p className="roulette-overview">
+                {currentDisplay?.overview 
+                  ? (currentDisplay.overview.length > 175 ? currentDisplay.overview.slice(0, 175) + '...' : currentDisplay.overview)
+                  : 'Handpicked award-winning feature film streaming in full 4K on AAYUSH.'}
+              </p>
 
-            <button 
-              className={`roulette-btn list-btn ${inList ? 'in-list' : ''}`}
-              onClick={handleToggleMyList}
-              disabled={isSpinning}
-            >
-              {inList ? <Check size={17} /> : <Plus size={17} />}
-              <span>{inList ? 'In My List' : 'Add to List'}</span>
-            </button>
+              {/* Action Buttons Row */}
+              <div className="roulette-actions-row">
+                <button 
+                  className="roulette-btn play-btn"
+                  onClick={handleWatchNow}
+                  disabled={isSpinning}
+                >
+                  <Play size={17} fill="black" />
+                  <span>Watch Now</span>
+                </button>
 
-            <button 
-              className="roulette-btn respin-btn"
-              onClick={() => startSpin()}
-              disabled={isSpinning}
-              title="Spin Again"
-            >
-              <RotateCw size={17} className={isSpinning ? 'spinning-icon' : ''} />
-              <span>{isSpinning ? 'Rolling...' : 'Spin Again'}</span>
-            </button>
+                <button 
+                  className={`roulette-btn list-btn ${inList ? 'in-list' : ''}`}
+                  onClick={handleToggleMyList}
+                  disabled={isSpinning}
+                >
+                  {inList ? <Check size={16} /> : <Plus size={16} />}
+                  <span>{inList ? 'In My List' : 'Add to List'}</span>
+                </button>
+
+                <button 
+                  className="roulette-btn respin-btn"
+                  onClick={() => startSpin()}
+                  disabled={isSpinning}
+                  title="Spin Again"
+                >
+                  <RotateCw size={16} className={isSpinning ? 'spinning-icon' : ''} />
+                  <span>{isSpinning ? 'Rolling...' : 'Spin Again'}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
